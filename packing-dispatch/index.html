@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PackFlow - Packing & Dispatch System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           DESIGN SYSTEM
+           ============================================ */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --accent: #f59e0b;
+            
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-dark: #1e293b;
+            
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            
+            --border: #e2e8f0;
+            
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --error: #ef4444;
+            --error-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition: all 0.2s ease;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { font-family: inherit; cursor: pointer; border: none; }
+
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-dark);
+            padding: var(--space-lg);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: var(--space-lg);
+        }
+
+        .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: var(--space-xs); }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: #94a3b8;
+            transition: var(--transition);
+        }
+
+        .sidebar-link:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar-link.active { background: var(--primary); color: white; }
+        .sidebar-link .icon { width: 20px; }
+
+        .sidebar-footer {
+            padding-top: var(--space-lg);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--radius-md);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .user-name { color: white; font-weight: 500; font-size: 0.9375rem; }
+        .user-role { color: var(--text-muted); font-size: 0.8125rem; }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            padding: var(--space-xl);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+        }
+
+        .page-title { font-size: 1.75rem; margin-bottom: var(--space-xs); }
+        .page-subtitle { color: var(--text-secondary); }
+
+        /* ============================================
+           COMPONENTS
+           ============================================ */
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .stat-icon.primary { background: var(--info-light); color: var(--primary); }
+        .stat-icon.success { background: var(--success-light); color: var(--success); }
+        .stat-icon.warning { background: var(--warning-light); color: var(--warning); }
+        .stat-icon.error { background: var(--error-light); color: var(--error); }
+
+        .stat-value { font-size: 2rem; font-weight: 700; }
+        .stat-label { font-size: 0.875rem; color: var(--text-muted); }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: var(--radius-md);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--bg-secondary); border-color: var(--text-muted); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-ghost:hover { background: var(--bg-tertiary); }
+
+        /* Kanban Board */
+        .kanban {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-lg);
+            min-height: 600px;
+        }
+
+        .kanban-column {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .kanban-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .kanban-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kanban-count {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .kanban-cards {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            overflow-y: auto;
+        }
+
+        .job-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .job-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-sm);
+        }
+
+        .job-id {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .job-priority {
+            font-size: 0.6875rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .job-priority.high { background: var(--error-light); color: var(--error); }
+        .job-priority.medium { background: var(--warning-light); color: var(--warning); }
+        .job-priority.low { background: var(--success-light); color: var(--success); }
+
+        .job-customer { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: var(--space-xs); }
+        .job-items { font-size: 0.8125rem; color: var(--text-muted); }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-new { background: var(--info-light); color: var(--primary); }
+        .badge-packing { background: var(--warning-light); color: var(--warning); }
+        .badge-ready { background: var(--success-light); color: var(--success); }
+        .badge-shipped { background: var(--bg-tertiary); color: var(--text-muted); }
+
+        /* Tables */
+        .table-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: var(--space-md) var(--space-lg); text-align: left; }
+        .table th { background: var(--bg-tertiary); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+        .table td { border-bottom: 1px solid var(--border); font-size: 0.9375rem; }
+        .table tr:last-child td { border-bottom: none; }
+        .table tr:hover td { background: var(--bg-tertiary); }
+
+        /* Forms */
+        .form-group { margin-bottom: var(--space-md); }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: var(--space-xs); }
+        .form-input, .form-select {
+            width: 100%;
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.9375rem;
+            background: var(--bg-secondary);
+        }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+
+        .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title { font-size: 1.25rem; font-weight: 600; }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: var(--text-muted);
+        }
+
+        .modal-close:hover { background: var(--bg-tertiary); }
+
+        .modal-body { padding: var(--space-lg); overflow-y: auto; max-height: 60vh; }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            border-top: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+
+        /* Box Cards */
+        .box-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+        }
+
+        .box-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+        }
+
+        .box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+        }
+
+        .box-number { font-size: 1.125rem; font-weight: 600; }
+        .box-status { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; }
+        .box-status.packed { background: var(--success-light); color: var(--success); }
+        .box-status.pending { background: var(--warning-light); color: var(--warning); }
+
+        .box-items {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .box-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: var(--space-md);
+            border-top: 1px solid var(--border);
+        }
+
+        .box-weight { font-size: 0.8125rem; color: var(--text-muted); }
+
+        /* Activity Timeline */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+
+        .activity-item {
+            display: flex;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .activity-content { flex: 1; }
+        .activity-text { font-size: 0.9375rem; }
+        .activity-time { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Labels */
+        .label-preview {
+            background: white;
+            border: 2px solid var(--text-primary);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            max-width: 350px;
+            font-family: monospace;
+        }
+
+        .label-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-md);
+            border-bottom: 2px dashed var(--border);
+        }
+
+        .label-logo { font-weight: 700; font-size: 1.25rem; }
+        .label-tracking { font-family: monospace; font-size: 0.875rem; }
+
+        .label-address {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: var(--space-md);
+        }
+
+        .label-barcode {
+            height: 60px;
+            background: repeating-linear-gradient(90deg, black 0px, black 2px, white 2px, white 4px);
+            border-radius: 4px;
+            margin-bottom: var(--space-sm);
+        }
+
+        /* Settings */
+        .settings-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .settings-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-sm) 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .settings-row:last-child { border-bottom: none; }
+
+        .settings-label { font-size: 0.9375rem; }
+        .settings-value { font-size: 0.875rem; color: var(--text-muted); }
+
+        /* Checkbox Items */
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+
+        .item-row input { width: 18px; height: 18px; }
+        .item-name { flex: 1; font-size: 0.9375rem; }
+        .item-qty { font-size: 0.8125rem; color: var(--text-muted); }
+
+        /* Section */
+        .section { margin-bottom: var(--space-xl); }
+        .section-header { margin-bottom: var(--space-lg); }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .kanban { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: var(--space-lg); }
+            .stats-grid { grid-template-columns: 1fr; }
+            .kanban { grid-template-columns: 1fr; }
+            .box-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate { animation: fadeIn 0.3s ease; }
+
+        /* Packing Progress */
+        .packing-progress {
+            margin-bottom: var(--space-lg);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: var(--space-sm);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        /* Grid helpers */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-lg); }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
+
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-sm { gap: var(--space-sm); }
+        .gap-md { gap: var(--space-md); }
+        .mb-lg { margin-bottom: var(--space-lg); }
+        .mb-xl { margin-bottom: var(--space-xl); }
+        .mt-xl { margin-top: var(--space-xl); }
+        .p-lg { padding: var(--space-lg); }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">📦 Pack<span style="color: #3b82f6;">Flow</span></div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-link active" data-view="dashboard">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="#" class="sidebar-link" data-view="jobs">
+                    <span class="icon">📋</span> Job Board
+                </a>
+                <a href="#" class="sidebar-link" data-view="packing">
+                    <span class="icon">📦</span> Packing
+                </a>
+                <a href="#" class="sidebar-link" data-view="boxes">
+                    <span class="icon">📤</span> Boxes
+                </a>
+                <a href="#" class="sidebar-link" data-view="labels">
+                    <span class="icon">🏷️</span> Labels
+                </a>
+                <a href="#" class="sidebar-link" data-view="activity">
+                    <span class="icon">📝</span> Activity
+                </a>
+                <a href="#" class="sidebar-link" data-view="settings">
+                    <span class="icon">⚙️</span> Settings
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">JW</div>
+                    <div>
+                        <div class="user-name">Jamie Wilson</div>
+                        <div class="user-role">Warehouse Manager</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-subtitle">Overview of packing and dispatch operations</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ New Order</button>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">📋</div>
+                        <div class="stat-value" id="totalJobs">12</div>
+                        <div class="stat-label">Total Jobs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">📦</div>
+                        <div class="stat-value" id="activeJobs">4</div>
+                        <div class="stat-label">In Packing</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">✅</div>
+                        <div class="stat-value" id="completedJobs">6</div>
+                        <div class="stat-label">Ready to Ship</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon error">🚚</div>
+                        <div class="stat-value" id="shippedJobs">2</div>
+                        <div class="stat-label">Shipped Today</div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="section">
+                    <h3 class="section-header">Recent Job Activity</h3>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Action</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activityTable">
+                                <!-- Rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Board View -->
+            <div id="jobs-view" class="view" style="display: none;">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Job Board</h1>
+                        <p class="page-subtitle">Drag jobs between columns to update status</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('newOrderModal')">+ New Order</button>
+                </div>
+
+                <div class="kanban">
+                    <div class="kanban-column">
+                        <div class="kanban-header">
+                            <span class="kanban-title">New Orders</span>
+                            <span class="kanban-count" id="new-count">3</span>
+                        </div>
+                        <div class="kanban-cards" id="new-orders"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="kanban-header">
+                            <span class="kanban-title">In Packing</span>
+                            <span class="kanban-count" id="packing-count">4</span>
+                        </div>
+                        <div class="kanban-cards" id="in-packing"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="kanban-header">
+                            <span class="kanban-title">Ready for Dispatch</span>
+                            <span class="kanban-count" id="ready-count">2</span>
+                        </div>
+                        <div class="kanban-cards" id="ready"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="kanban-header">
+                            <span class="kanban-title">Shipped</span>
+                            <span class="kanban-count" id="shipped-count">1</span>
+                        </div>
+                        <div class="kanban-cards" id="shipped"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Packing View -->
+            <div id="packing-view" class="view" style="display: none;">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Packing Workflow</h1>
+                        <p class="page-subtitle">Select a job to start packing</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <h3 class="mb-lg">Active Packing Jobs</h3>
+                        <div id="packingJobsList"></div>
+                    </div>
+                    <div id="packingDetail" style="display: none;">
+                        <div class="card">
+                            <h3 class="mb-lg" id="selectedJobTitle">Job #ORD-001</h3>
+                            
+                            <div class="packing-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="packingProgress" style="width: 0%"></div>
+                                </div>
+                                <div class="progress-text" id="packingProgressText">0 of 0 items packed</div>
+                            </div>
+
+                            <h4 class="mb-md">Items to Pack</h4>
+                            <div class="item-list" id="packingItems">
+                                <!-- Rendered by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boxes View -->
+            <div id="boxes-view" class="view" style="display: none;">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Box Management</h1>
+                        <p class="page-subtitle">View and manage packed boxes</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="createNewBox()">+ Create Box</button>
+                </div>
+
+                <div class="box-grid" id="boxGrid">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Labels View -->
+            <div id="labels-view" class="view" style="display: none;">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Label Generation</h1>
+                        <p class="page-subtitle">Generate and print shipping labels</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <h3 class="mb-lg">Ready for Label Generation</h3>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Box</th>
+                                        <th>Destination</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="labelTable">
+                                    <!-- Rendered by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="mb-lg">Label Preview</h3>
+                        <div class="label-preview">
+                            <div class="label-header">
+                                <span class="label-logo">PackFlow</span>
+                                <span class="label-tracking" id="trackingNumber">PF-2026-00001</span>
+                            </div>
+                            <div class="label-address">
+                                <strong>Ship To:</strong><br>
+                                <span id="labelName">John Smith</span><br>
+                                <span id="labelAddress">123 Main Street<br>Apt 4B<br>New York, NY 10001</span>
+                            </div>
+                            <div class="label-barcode"></div>
+                            <div style="text-align: center; font-size: 0.75rem; font-family: monospace;">●━━━━━━●</div>
+                        </div>
+                        <div class="flex gap-sm mt-xl">
+                            <button class="btn btn-primary w-full">Print Label</button>
+                            <button class="btn btn-secondary w-full">Download PDF</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity View -->
+            <div id="activity-view" class="view" style="display: none;">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Activity Log</h1>
+                        <p class="page-subtitle">Timeline of all operations</p>
+                    </div>
+                </div>
+
+                <div class="activity-list" id="activityLog">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="settings-view" class="view" style="display: none;">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Settings</h1>
+                        <p class="page-subtitle">System configuration</p>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-title">Order Source (Dropbox Integration)</h3>
+                    <div class="settings-row">
+                        <span class="settings-label">Dropbox Folder Path</span>
+                        <span class="settings-value">/packflow/orders/incoming</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-label">Import Frequency</span>
+                        <span class="settings-value">Every 5 minutes</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-label">File Format</span>
+                        <span class="settings-value">CSV, JSON</span>
+                    </div>
+                    <div class="form-group mt-lg">
+                        <label class="form-label">Custom Path</label>
+                        <input type="text" class="form-input" value="/packflow/orders/incoming">
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-title">Packing Workflow</h3>
+                    <div class="settings-row">
+                        <span class="settings-label">Auto-create Boxes</span>
+                        <label><input type="checkbox" checked> Enabled</label>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-label">Max Items per Box</span>
+                        <span class="settings-value">10 items</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-label">Weight Threshold</span>
+                        <span class="settings-value">50 lbs</span>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-title">Shipping Providers</h3>
+                    <div class="settings-row">
+                        <span class="settings-label">Default Carrier</span>
+                        <span class="settings-value">UPS</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-label">Label Format</span>
+                        <span class="settings-value">4x6 shipping label</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- New Order Modal -->
+    <div class="modal-overlay" id="newOrderModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Order</h3>
+                <button class="modal-close" onclick="closeModal('newOrderModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Customer Name</label>
+                    <input type="text" class="form-input" id="newCustomer" placeholder="Enter customer name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Shipping Address</label>
+                    <textarea class="form-input" id="newAddress" placeholder="Enter full address"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Items (one per line)</label>
+                    <textarea class="form-input" id="newItems" placeholder="Product Name - Qty&#10;Example: Widget A - 2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select class="form-input" id="newPriority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('newOrderModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="createNewOrder()">Create Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // MOCK DATA
+        // ============================================
+        
+        let orders = [
+            { id: 'ORD-1001', customer: 'Acme Corp', address: '123 Industrial Ave, Chicago, IL', items: [{name: 'Widget A', qty: 5}, {name: 'Gadget B', qty: 2}], status: 'new', priority: 'high', created: '10:30 AM' },
+            { id: 'ORD-1002', customer: 'TechStart Inc', address: '456 Tech Park, San Francisco, CA', items: [{name: 'Circuit Board', qty: 10}, {name: 'Chip Set', qty: 10}], status: 'new', priority: 'medium', created: '10:15 AM' },
+            { id: 'ORD-1003', customer: 'Global Logistics', address: '789 Harbor Dr, Miami, FL', items: [{name: 'Cable Pack', qty: 20}], status: 'packing', priority: 'low', created: '9:45 AM' },
+            { id: 'ORD-1004', customer: 'BuildRight LLC', address: '321 Construction Way, Dallas, TX', items: [{name: 'Bearings', qty: 50}, {name: 'Bolts (box)', qty: 5}], status: 'packing', priority: 'medium', created: '9:30 AM' },
+            { id: 'ORD-1005', customer: 'Office Solutions', address: '555 Corporate Blvd, Seattle, WA', items: [{name: 'Printer Paper', qty: 10}, {name: 'Ink Cartridges', qty: 5}], status: 'packing', priority: 'high', created: '9:15 AM' },
+            { id: 'ORD-1006', customer: 'Medical Supply Co', address: '999 Health St, Boston, MA', items: [{name: 'Gloves (case)', qty: 10}], status: 'packing', priority: 'high', created: '9:00 AM' },
+            { id: 'ORD-1007', customer: 'Retail Express', address: '777 Market St, Portland, OR', items: [{name: 'Display Unit', qty: 2}], status: 'ready', priority: 'low', created: '8:45 AM' },
+            { id: 'ORD-1008', customer: 'EduTech Solutions', address: '444 Learning Lane, Austin, TX', items: [{name: 'Laptop', qty: 5}, {name: 'Mouse', qty: 5}], status: 'ready', priority: 'medium', created: '8:30 AM' },
+            { id: 'ORD-1009', customer: 'FoodService Plus', address: '111 Kitchen Ave, Denver, CO', items: [{name: 'Prep Table', qty: 1}], status: 'shipped', priority: 'low', created: '8:00 AM' }
+        ];
+
+        let boxes = [
+            { id: 'BOX-001', orderId: 'ORD-1003', items: ['Cable Pack x20'], weight: '12 lbs', status: 'pending', label: 'PF-2026-10001' },
+            { id: 'BOX-002', orderId: 'ORD-1004', items: ['Bolts (box) x5'], weight: '25 lbs', status: 'packed', label: 'PF-2026-10002' },
+            { id: 'BOX-003', orderId: 'ORD-1004', items: ['Bearings x50'], weight: '15 lbs', status: 'pending', label: null }
+        ];
+
+        let activityLog = [
+            { icon: '📋', text: 'New order ORD-1001 received from Acme Corp', time: '10:30 AM' },
+            { icon: '📋', text: 'New order ORD-1002 received from TechStart Inc', time: '10:15 AM' },
+            { icon: '📦', text: 'Packing started for ORD-1003', time: '9:45 AM' },
+            { icon: '📦', text: 'Packing started for ORD-1004', time: '9:30 AM' },
+            { icon: '✅', text: 'Box BOX-002 packed and ready', time: '9:20 AM' },
+            { icon: '📤', text: 'Label generated for BOX-002', time: '9:15 AM' }
+        ];
+
+        let selectedJob = null;
+
+        // ============================================
+        // RENDER FUNCTIONS
+        // ============================================
+
+        function renderJobCards() {
+            // Clear all columns
+            document.getElementById('new-orders').innerHTML = '';
+            document.getElementById('in-packing').innerHTML = '';
+            document.getElementById('ready').innerHTML = '';
+            document.getElementById('shipped').innerHTML = '';
+
+            let counts = { new: 0, packing: 0, ready: 0, shipped: 0 };
+
+            orders.forEach(order => {
+                const card = createJobCard(order);
+                const column = order.status === 'new' ? 'new-orders' :
+                           order.status === 'packing' ? 'in-packing' :
+                           order.status === 'ready' ? 'ready' : 'shipped';
+                document.getElementById(column).appendChild(card);
+                counts[order.status]++;
+            });
+
+            document.getElementById('new-count').textContent = counts.new;
+            document.getElementById('packing-count').textContent = counts.packing;
+            document.getElementById('ready-count').textContent = counts.ready;
+            document.getElementById('shipped-count').textContent = counts.shipped;
+
+            document.getElementById('totalJobs').textContent = orders.length;
+            document.getElementById('activeJobs').textContent = counts.packing;
+            document.getElementById('completedJobs').textContent = counts.ready + counts.shipped;
+            document.getElementById('shippedJobs').textContent = counts.shipped;
+        }
+
+        function createJobCard(order) {
+            const div = document.createElement('div');
+            div.className = 'job-card';
+            div.innerHTML = `
+                <div class="job-header">
+                    <span class="job-id">${order.id}</span>
+                    <span class="job-priority ${order.priority}">${order.priority}</span>
+                </div>
+                <div class="job-customer">${order.customer}</div>
+                <div class="job-items">${order.items.length} items • ${order.items.reduce((a,i) => a + i.qty, 0)} units</div>
+            `;
+            div.onclick = () => openJobDetail(order.id);
+            return div;
+        }
+
+        function renderPackingJobs() {
+            const container = document.getElementById('packingJobsList');
+            const packingOrders = orders.filter(o => o.status === 'packing');
+            
+            container.innerHTML = packingOrders.map(order => `
+                <div class="job-card" onclick="openJobDetail('${order.id}')" style="margin-bottom: var(--space-md);">
+                    <div class="job-header">
+                        <span class="job-id">${order.id}</span>
+                        <span class="badge badge-packing">In Packing</span>
+                    </div>
+                    <div class="job-customer">${order.customer}</div>
+                    <div class="job-items">${order.items.length} items to pack</div>
+                </div>
+            `).join('');
+        }
+
+        function openJobDetail(orderId) {
+            selectedJob = orders.find(o => o.id === orderId);
+            if (!selectedJob) return;
+
+            const detail = document.getElementById('packingDetail');
+            detail.style.display = 'block';
+
+            document.getElementById('selectedJobTitle').textContent = `Job #${selectedJob.id} - ${selectedJob.customer}`;
+            
+            const itemsContainer = document.getElementById('packingItems');
+            itemsContainer.innerHTML = selectedJob.items.map((item, idx) => `
+                <div class="item-row" onclick="toggleItem(this)">
+                    <input type="checkbox" id="item-${idx}">
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-qty">×${item.qty}</span>
+                </div>
+            `).join('');
+
+            updatePackingProgress();
+            switchView('packing');
+        }
+
+        function toggleItem(row) {
+            const checkbox = row.querySelector('input');
+            checkbox.checked = !checkbox.checked;
+            updatePackingProgress();
+        }
+
+        function updatePackingProgress() {
+            const items = document.querySelectorAll('#packingItems input[type="checkbox"]');
+            const checked = document.querySelectorAll('#packingItems input[type="checkbox"]:checked').length;
+            const total = items.length || 1;
+            const percent = (checked / total) * 100;
+            
+            document.getElementById('packingProgress').style.width = percent + '%';
+            document.getElementById('packingProgressText').textContent = `${checked} of ${total} items packed`;
+        }
+
+        function renderBoxes() {
+            document.getElementById('boxGrid').innerHTML = boxes.map(box => `
+                <div class="box-card">
+                    <div class="box-header">
+                        <span class="box-number">${box.id}</span>
+                        <span class="box-status ${box.status}">${box.status === 'packed' ? 'Packed' : 'In Progress'}</span>
+                    </div>
+                    <div class="box-items">
+                        <div style="font-weight: 600; margin-bottom: var(--space-xs);">Order: ${box.orderId}</div>
+                        ${box.items.join('<br>')}
+                    </div>
+                    <div class="box-footer">
+                        <span class="box-weight">${box.weight}</span>
+                        ${box.status === 'packed' ? `<span class="badge badge готов">✓ Label Ready</span>` : 
+                          `<button class="btn btn-sm btn-secondary" onclick="generateLabel('${box.id}')">Gen Label</button>`}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderActivity() {
+            document.getElementById('activityLog').innerHTML = activityLog.map(item => `
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: var(--info-light); color: var(--primary);">${item.icon}</div>
+                    <div class="activity-content">
+                        <div class="activity-text">${item.text}</div>
+                        <div class="activity-time">${item.time}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update activity table
+            document.getElementById('activityTable').innerHTML = activityLog.slice(0, 5).map(item => `
+                <tr>
+                    <td>${item.text.split(' ')[1] || '-'}</td>
+                    <td>${item.text.split('from ')[1]?.split(',')[0] || '-'}</td>
+                    <td>${item.text.split(item.text.split(' ')[0] + ' ')[1].split(' at ')[0]}</td>
+                    <td>${item.time}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderLabels() {
+            const readyBoxes = boxes.filter(b => b.status === 'packed' && b.label);
+            document.getElementById('labelTable').innerHTML = readyBoxes.length ? readyBoxes.map(box => `
+                <tr>
+                    <td>${box.id}</td>
+                    <td>${box.orderId}</td>
+                    <td><button class="btn btn-sm btn-primary" onclick="viewLabel('${box.id}')">View</button></td>
+                </tr>
+            `).join('') : '<tr><td colspan="3">No boxes ready for labeling</td></tr>';
+        }
+
+        // ============================================
+        // ACTIONS
+        // ============================================
+
+        function createNewOrder() {
+            const customer = document.getElementById('newCustomer').value;
+            const address = document.getElementById('newAddress').value;
+            const itemsText = document.getElementById('newItems').value;
+            const priority = document.getElementById('newPriority').value;
+
+            if (!customer || !itemsText) {
+                alert('Please fill in required fields');
+                return;
+            }
+
+            const items = itemsText.split('\n').filter(i => i.trim()).map(line => {
+                const parts = line.split(' - ');
+                return { name: parts[0].trim(), qty: parseInt(parts[1]) || 1 };
+            });
+
+            const newOrder = {
+                id: 'ORD-' + (1000 + orders.length + 1),
+                customer,
+                address,
+                items,
+                status: 'new',
+                priority,
+                created: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            orders.unshift(newOrder);
+            activityLog.unshift({
+                icon: '📋',
+                text: `New order ${newOrder.id} received from ${customer}`,
+                time: newOrder.created
+            });
+
+            renderJobCards();
+            renderActivity();
+            closeModal('newOrderModal');
+            
+            // Clear form
+            document.getElementById('newCustomer').value = '';
+            document.getElementById('newAddress').value = '';
+            document.getElementById('newItems').value = '';
+        }
+
+        function createNewBox() {
+            const newBox = {
+                id: 'BOX-00' + (boxes.length + 1),
+                orderId: selectedJob?.id || 'ORD-1003',
+                items: ['New Item'],
+                weight: '0 lbs',
+                status: 'pending',
+                label: null
+            };
+            boxes.push(newBox);
+            renderBoxes();
+        }
+
+        function generateLabel(boxId) {
+            const box = boxes.find(b => b.id === boxId);
+            if (box) {
+                box.status = 'packed';
+                box.label = 'PF-2026-' + Math.floor(Math.random() * 9000 + 1000);
+                activityLog.unshift({
+                    icon: '🏷️',
+                    text: `Label generated for ${boxId}`,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+                renderBoxes();
+                renderLabels();
+            }
+        }
+
+        function viewLabel(boxId) {
+            const box = boxes.find(b => b.id === boxId);
+            if (box) {
+                document.getElementById('trackingNumber').textContent = box.label || 'N/A';
+                document.getElementById('labelName').textContent = 'Customer';
+                document.getElementById('labelAddress').innerHTML = box.orderId + '<br>Box: ' + box.id;
+            }
+        }
+
+        // ============================================
+        // VIEW SWITCHING
+        // ============================================
+
+        function switchView(view) {
+            document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+            document.getElementById(view + '-view').style.display = 'block';
+            
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            document.querySelector(`[data-view="${view}"]`).classList.add('active');
+        }
+
+        // Navigation
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const view = link.dataset.view;
+                switchView(view);
+            });
+        });
+
+        // ============================================
+        // MODALS
+        // ============================================
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        // ============================================
+        // INIT
+        // ============================================
+
+        function init() {
+            renderJobCards();
+            renderPackingJobs();
+            renderBoxes();
+            renderActivity();
+            renderLabels();
+        }
+
+        init();
+    </script>
+</body>
+</html>
