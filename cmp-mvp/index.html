@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conservation Management Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border-color: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-green: #3fb950;
+            --accent-blue: #58a6ff;
+            --accent-purple: #a371f7;
+            --accent-orange: #f0883e;
+            --accent-red: #f85149;
+            --accent-pink: #db61a2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .logo h1 {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(88, 166, 255, 0.1);
+            color: var(--accent-blue);
+            border-left-color: var(--accent-blue);
+        }
+
+        .nav-item .icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .nav-item.active .badge {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        /* Stats in sidebar */
+        .sidebar-stats {
+            padding: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .stat-item .label {
+            color: var(--text-secondary);
+        }
+
+        .stat-item .value {
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Main content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-muted);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        /* Tab content panels */
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Builder Tab */
+        .pipeline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .pipeline-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+
+        .pipeline-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .pipeline-card .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0 0 16px 0;
+            border: none;
+            background: none;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .pipeline-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-complete {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--accent-green);
+        }
+
+        .status-active {
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--accent-blue);
+        }
+
+        .status-pending {
+            background: rgba(139, 148, 158, 0.15);
+            color: var(--text-secondary);
+        }
+
+        .pipeline-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .pipeline-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .pipeline-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .folder-input {
+            flex: 1;
+            padding: 10px 14px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .file-list {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item .icon {
+            color: var(--accent-orange);
+        }
+
+        .file-item .size {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Editor Tab */
+        .editor-controls {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .node-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .node-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .node-card:hover {
+            border-color: var(--accent-purple);
+        }
+
+        .node-type {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .node-type.person {
+            background: rgba(219, 97, 162, 0.15);
+            color: var(--accent-pink);
+        }
+
+        .node-type.document {
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--accent-blue);
+        }
+
+        .node-type.photo {
+            background: rgba(243, 136, 62, 0.15);
+            color: var(--accent-orange);
+        }
+
+        .node-type.place {
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--accent-green);
+        }
+
+        .node-type.event {
+            background: rgba(163, 113, 247, 0.15);
+            color: var(--accent-purple);
+        }
+
+        .node-card h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .node-properties {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .node-properties .prop {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .node-properties .key {
+            color: var(--text-muted);
+            min-width: 80px;
+        }
+
+        .node-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Query Tab */
+        .query-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .query-input-area {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .query-input-area h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+        }
+
+        .query-input {
+            width: 100%;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: inherit;
+            resize: none;
+            min-height: 80px;
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .query-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .query-result {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .query-result h3 {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .result-message {
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .result-message p {
+            line-height: 1.6;
+        }
+
+        .result-references {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .reference-card {
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .reference-card .icon {
+            margin-right: 8px;
+        }
+
+        /* Visualization Tab */
+        .viz-grid {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 24px;
+        }
+
+        .viz-filters {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            height: fit-content;
+        }
+
+        .viz-filters h3 {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .viz-canvas {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            min-height: 500px;
+        }
+
+        .viz-canvas h3 {
+            margin-bottom: 24px;
+            font-size: 18px;
+        }
+
+        /* Timeline visualization */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 16px 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -32px;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            border: 3px solid var(--bg-secondary);
+        }
+
+        .timeline-content {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .timeline-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .timeline-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .timeline-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-card .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Multimedia Tab */
+        .media-filters {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-chip:hover, .filter-chip.active {
+            border-color: var(--accent-blue);
+            background: rgba(88, 166, 255, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .media-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .media-item:hover {
+            transform: scale(1.02);
+        }
+
+        .media-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .media-item .overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            opacity: 0;
+            transition: opacity 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 12px;
+        }
+
+        .media-item:hover .overlay {
+            opacity: 1;
+        }
+
+        .media-item .title {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .media-item .meta {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .media-tag {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 8px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: 50%;
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pipeline-card, .node-card, .media-item {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .pipeline-card:nth-child(1) { animation-delay: 0.05s; }
+        .pipeline-card:nth-child(2) { animation-delay: 0.1s; }
+        .pipeline-card:nth-child(3) { animation-delay: 0.15s; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>
+                <div class="logo-icon">💾</div>
+                CMP
+            </h1>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-item active" data-tab="builder">
+                <span class="icon">⚙️</span>
+                Builder
+                <span class="badge">3</span>
+            </div>
+            <div class="nav-item" data-tab="editor">
+                <span class="icon">✏️</span>
+                Editor
+            </div>
+            <div class="nav-item" data-tab="query">
+                <span class="icon">🔍</span>
+                Query
+            </div>
+            <div class="nav-item" data-tab="visualization">
+                <span class="icon">📊</span>
+                Visualization
+            </div>
+            <div class="nav-item" data-tab="multimedia">
+                <span class="icon">🖼️</span>
+                Multimedia
+            </div>
+        </nav>
+
+        <div class="sidebar-stats">
+            <div class="stat-item">
+                <span class="label">Documents</span>
+                <span class="value">847</span>
+            </div>
+            <div class="stat-item">
+                <span class="label">Photos</span>
+                <span class="value">2,341</span>
+            </div>
+            <div class="stat-item">
+                <span class="label">People</span>
+                <span class="value">156</span>
+            </div>
+            <div class="stat-item">
+                <span class="label">Places</span>
+                <span class="value">89</span>
+            </div>
+            <div class="stat-item">
+                <span class="label">Events</span>
+                <span class="value">234</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <header class="header">
+            <h2 id="tab-title">Pipeline Builder</h2>
+            <div class="header-actions">
+                <button class="btn btn-secondary">⚙️ Settings</button>
+                <button class="btn btn-primary">▶️ Run All</button>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Builder Tab -->
+            <div class="tab-panel active" id="builder">
+                <div class="pipeline-grid">
+                    <div class="pipeline-card">
+                        <div class="header">
+                            <h3>Text-to-KG Pipeline</h3>
+                            <span class="pipeline-status status-complete">Complete</span>
+                        </div>
+                        <p>Processes documents, journals, and text files. Converts text to embeddings and extracts entities for the knowledge graph.</p>
+                        <div class="pipeline-controls">
+                            <input type="text" class="folder-input" value="~/Conservation/Documents" placeholder="Select folder...">
+                            <button class="btn btn-secondary">📁</button>
+                        </div>
+                        <button class="btn btn-primary">▶️ Process Documents</button>
+                        <div style="margin-top: 16px;">
+                            <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+                            <span class="progress-text">847 documents processed</span>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-card">
+                        <div class="header">
+                            <h3>Image-to-KG Pipeline</h3>
+                            <span class="pipeline-status status-active">In Progress</span>
+                        </div>
+                        <p>Processes photos and videos. Extracts metadata, performs facial recognition, and generates semantic descriptions.</p>
+                        <div class="pipeline-controls">
+                            <input type="text" class="folder-input" value="~/Conservation/Photos" placeholder="Select folder...">
+                            <button class="btn btn-secondary">📁</button>
+                        </div>
+                        <button class="btn btn-primary">▶️ Process Images</button>
+                        <div style="margin-top: 16px;">
+                            <div class="progress-bar"><div class="progress-fill" style="width: 67%"></div></div>
+                            <span class="progress-text">1,567 of 2,341 photos processed</span>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-card">
+                        <div class="header">
+                            <h3>API-to-KG Pipeline</h3>
+                            <span class="pipeline-status status-pending">Pending</span>
+                        </div>
+                        <p>Connects to email, calendar, contacts, and other APIs. Syncs data from external services.</p>
+                        <div class="pipeline-controls">
+                            <select class="folder-input">
+                                <option>Email (Gmail)</option>
+                                <option>Calendar (Google)</option>
+                                <option>Contacts (Apple)</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-secondary">🔗 Connect API</button>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 16px;">Recent Files</h3>
+                <div class="file-list">
+                    <div class="file-item"><span class="icon">📄</span> journal_2024_dec.md <span class="size">24 KB</span></div>
+                    <div class="file-item"><span class="icon">📄</span> family_reunion_notes.txt <span class="size">12 KB</span></div>
+                    <div class="file-item"><span class="icon">📄</span> travel_diary_2023.md <span class="size">18 KB</span></div>
+                    <div class="file-item"><span class="icon">🖼️</span> vacation_photo_0124.jpg <span class="size">2.4 MB</span></div>
+                    <div class="file-item"><span class="icon">🖼️</span> birthday_party_0089.jpg <span class="size">1.8 MB</span></div>
+                </div>
+            </div>
+
+            <!-- Editor Tab -->
+            <div class="tab-panel" id="editor">
+                <div class="editor-controls">
+                    <input type="text" class="search-input" placeholder="Search nodes by type, property, or keyword...">
+                    <button class="btn btn-primary">🔍 Search</button>
+                </div>
+
+                <div class="node-grid">
+                    <div class="node-card">
+                        <span class="node-type person">Person</span>
+                        <h4>Sarah Johnson</h4>
+                        <div class="node-properties">
+                            <div class="prop"><span class="key">Email:</span> sarah@email.com</div>
+                            <div class="prop"><span class="key">Born:</span> March 15, 1985</div>
+                            <div class="prop"><span class="key">Relations:</span> Mother of Emma</div>
+                        </div>
+                        <div class="node-actions">
+                            <button class="btn btn-secondary btn-sm">✏️ Edit</button>
+                            <button class="btn btn-secondary btn-sm">🔗 Link</button>
+                            <button class="btn btn-secondary btn-sm">🗑️</button>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <span class="node-type photo">Photo</span>
+                        <h4>Family Reunion 2023</h4>
+                        <div class="node-properties">
+                            <div class="prop"><span class="key">Date:</span> Aug 12, 2023</div>
+                            <div class="prop"><span class="key">Location:</span> Central Park</div>
+                            <div class="prop"><span class="key">Faces:</span> 8 detected</div>
+                        </div>
+                        <div class="node-actions">
+                            <button class="btn btn-secondary btn-sm">✏️ Edit</button>
+                            <button class="btn btn-secondary btn-sm">🔗 Link</button>
+                            <button class="btn btn-secondary btn-sm">🗑️</button>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <span class="node-type document">Document</span>
+                        <h4>Journal Entry - Dec 2024</h4>
+                        <div class="node-properties">
+                            <div class="prop"><span class="key">Type:</span> Markdown</div>
+                            <div class="prop"><span class="key">Date:</span> Dec 1, 2024</div>
+                            <div class="prop"><span class="key">Words:</span> 1,247</div>
+                        </div>
+                        <div class="node-actions">
+                            <button class="btn btn-secondary btn-sm">✏️ Edit</button>
+                            <button class="btn btn-secondary btn-sm">🔗 Link</button>
+                            <button class="btn btn-secondary btn-sm">🗑️</button>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <span class="node-type place">Place</span>
+                        <h4>Grandma's House</h4>
+                        <div class="node-properties">
+                            <div class="prop"><span class="key">Address:</span> 123 Oak Street</div>
+                            <div class="prop"><span class="key">City:</span> Springfield</div>
+                            <div class="prop"><span class="key">Visits:</span> 45</div>
+                        </div>
+                        <div class="node-actions">
+                            <button class="btn btn-secondary btn-sm">✏️ Edit</button>
+                            <button class="btn btn-secondary btn-sm">🔗 Link</button>
+                            <button class="btn btn-secondary btn-sm">🗑️</button>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <span class="node-type event">Event</span>
+                        <h4>Emma's Graduation</h4>
+                        <div class="node-properties">
+                            <div class="prop"><span class="key">Date:</span> May 20, 2024</div>
+                            <div class="prop"><span class="key">Location:</span> State University</div>
+                            <div class="prop"><span class="key">Attendees:</span> 156</div>
+                        </div>
+                        <div class="node-actions">
+                            <button class="btn btn-secondary btn-sm">✏️ Edit</button>
+                            <button class="btn btn-secondary btn-sm">🔗 Link</button>
+                            <button class="btn btn-secondary btn-sm">🗑️</button>
+                        </div>
+                    </div>
+
+                    <div class="node-card">
+                        <span class="node-type document">Document</span>
+                        <h4>Wedding Letters Collection</h4>
+                        <div class="node-properties">
+                            <div class="prop"><span class="key">Type:</span> Scanned PDF</div>
+                            <div class="prop"><span class="key">Date:</span> June 2018</div>
+                            <div class="prop"><span class="key">Pages:</span> 24</div>
+                        </div>
+                        <div class="node-actions">
+                            <button class="btn btn-secondary btn-sm">✏️ Edit</button>
+                            <button class="btn btn-secondary btn-sm">🔗 Link</button>
+                            <button class="btn btn-secondary btn-sm">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Query Tab -->
+            <div class="tab-panel" id="query">
+                <div class="query-container">
+                    <div class="query-input-area">
+                        <h3>Ask a question about your archive</h3>
+                        <textarea class="query-input" placeholder="e.g., 'Show me every photo of Grandma from 2015' or 'What did Aunt Susan email about the wedding?'">Show me every photo of Grandma from 2015</textarea>
+                        <div class="query-actions">
+                            <button class="btn btn-secondary">📋 Copy Cypher</button>
+                            <button class="btn btn-primary">🔍 Ask</button>
+                        </div>
+                    </div>
+
+                    <div class="query-result">
+                        <h3>Results</h3>
+                        <div class="result-message">
+                            <p>Found 47 photos of <strong>Grandma (Eleanor Wilson)</strong> from 2015. The photos were taken at various family gatherings including Easter brunch, the summer picnic, and Thanksgiving. Most photos were taken at Grandma's House (123 Oak Street) and the family beach house in Malibu.</p>
+                        </div>
+                        <h4 style="margin-bottom: 12px; font-size: 14px; color: var(--text-secondary);">Related Nodes (12)</h4>
+                        <div class="result-references">
+                            <div class="reference-card"><span class="icon">👤</span>Person: Eleanor Wilson</div>
+                            <div class="reference-card"><span class="icon">🏠</span>Place: Grandma's House</div>
+                            <div class="reference-card"><span class="icon">🏖️</span>Place: Malibu Beach House</div>
+                            <div class="reference-card"><span class="icon">🎄</span>Event: Easter 2015</div>
+                            <div class="reference-card"><span class="icon">🎄</span>Event: Summer Picnic 2015</div>
+                            <div class="reference-card"><span class="icon">🎄</span>Event: Thanksgiving 2015</div>
+                            <div class="reference-card"><span class="icon">📄</span>Doc: Easter Journal</div>
+                            <div class="reference-card"><span class="icon">📄</span>Doc: Summer Notes</div>
+                            <div class="reference-card"><span class="icon">📧</span>Message: Susan's Email</div>
+                            <div class="reference-card"><span class="icon">👤</span>Person: Aunt Susan</div>
+                            <div class="reference-card"><span class="icon">👤</span>Person: Mom</div>
+                            <div class="reference-card"><span class="icon">👤</span>Person: Dad</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization Tab -->
+            <div class="tab-panel" id="visualization">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="icon" style="background: rgba(88, 166, 255, 0.15); color: var(--accent-blue);">📄</div>
+                        <div class="value">847</div>
+                        <div class="label">Documents</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon" style="background: rgba(243, 136, 62, 0.15); color: var(--accent-orange);">🖼️</div>
+                        <div class="value">2,341</div>
+                        <div class="label">Photos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon" style="background: rgba(219, 97, 162, 0.15); color: var(--accent-pink);">👤</div>
+                        <div class="value">156</div>
+                        <div class="label">People</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon" style="background: rgba(163, 113, 247, 0.15); color: var(--accent-purple);">📅</div>
+                        <div class="value">234</div>
+                        <div class="label">Events</div>
+                    </div>
+                </div>
+
+                <div class="viz-grid">
+                    <div class="viz-filters">
+                        <h3>Filter</h3>
+                        <div class="filter-group">
+                            <label>Visualization Type</label>
+                            <select>
+                                <option>Timeline</option>
+                                <option>Network Graph</option>
+                                <option>Histogram</option>
+                                <option>Category Summary</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Date Range</label>
+                            <select>
+                                <option>All Time</option>
+                                <option>This Year</option>
+                                <option>Last 5 Years</option>
+                                <option>Last 10 Years</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Category</label>
+                            <select>
+                                <option>All Categories</option>
+                                <option>Photos</option>
+                                <option>Documents</option>
+                                <option>Events</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%;">🔄 Update</button>
+                    </div>
+
+                    <div class="viz-canvas">
+                        <h3>Timeline</h3>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">Dec 2024</div>
+                                    <div class="timeline-title">Journal Entry: Year in Review</div>
+                                    <div class="timeline-meta">Document • 2,450 words</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">Nov 2024</div>
+                                    <div class="timeline-title">Family Thanksgiving</div>
+                                    <div class="timeline-meta">Event • 24 photos • 12 people</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">Aug 2024</div>
+                                    <div class="timeline-title">Summer Road Trip</div>
+                                    <div class="timeline-meta">Event • 156 photos • 4 places</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">May 2024</div>
+                                    <div class="timeline-title">Emma's College Graduation</div>
+                                    <div class="timeline-meta">Event • 89 photos • 156 attendees</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">Mar 2024</div>
+                                    <div class="timeline-title">Spring Break in Hawaii</div>
+                                    <div class="timeline-meta">Event • 234 photos • 8 people</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">Jan 2024</div>
+                                    <div class="timeline-title">New Year Resolutions</div>
+                                    <div class="timeline-meta">Document • 890 words</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multimedia Tab -->
+            <div class="tab-panel" id="multimedia">
+                <div class="media-filters">
+                    <div class="filter-chip active">All Photos</div>
+                    <div class="filter-chip">People</div>
+                    <div class="filter-chip">Places</div>
+                    <div class="filter-chip">Events</div>
+                    <div class="filter-chip">2024</div>
+                    <div class="filter-chip">2023</div>
+                    <div class="filter-chip">2022</div>
+                </div>
+
+                <div class="media-grid">
+                    <div class="media-item" onclick="openModal(0)">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 48px;">🏖️</span>
+                        </div>
+                        <div class="overlay">
+                            <div class="title">Beach Day</div>
+                            <div class="meta">Aug 12, 2024 • Malibu</div>
+                        </div>
+                        <div class="media-tag">Photo</div>
+                    </div>
+                    <div class="media-item" onclick="openModal(1)">
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 48px;">🎂</span>
+                        </div>
+                        <div class="overlay">
+                            <div class="title">Birthday Party</div>
+                            <div class="meta">May 20, 2024 • Home</div>
+                        </div>
+                        <div class="media-tag">Photo</div>
+                    </div>
+                    <div class="media-item" onclick="openModal(2)">
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 48px;">🎓</span>
+                        </div>
+                        <div class="overlay">
+                            <div class="title">Graduation</div>
+                            <div class="meta">May 20, 2024 • University</div>
+                        </div>
+                        <div class="media-tag">Photo</div>
+                    </div>
+                    <div class="media-item" onclick="openModal(3)">
+                        <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 48px;">🌴</span>
+                        </div>
+                        <div class="overlay">
+                            <div class="title">Hawaii Trip</div>
+                            <div class="meta">Mar 10-17, 2024 • Hawaii</div>
+                        </div>
+                        <div class="media-tag">Photo</div>
+                    </div>
+                    <div class="media-item" onclick="openModal(4)">
+                        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 48px;">🦃</span>
+                        </div>
+                        <div class="overlay">
+                            <div class="title">Thanksgiving</div>
+                            <div class="meta">Nov 23, 2023 • Grandma's House</div>
+                        </div>
+                        <div class="media-tag">Photo</div>
+                    </div>
+                    <div class="media-item" onclick="openModal(5)">
+                        <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 48px;">🌸</span>
+                        </div>
+                        <div class="overlay">
+                            <div class="title">Easter Brunch</div>
+                            <div class="meta">Apr 9, 2023 • Home</div>
+                        </div>
+                        <div class="media-tag">Photo</div>
+                    </div>
+                    <div class="media-item" onclick="openModal(6)">
+                        <div style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 48px;">🎄</span>
+                        </div>
+                        <div class="overlay">
+                            <div class="title">Christmas Morning</div>
+                            <div class="meta">Dec 25, 2022 • Home</div>
+                        </div>
+                        <div class="media-tag">Photo</div>
+                    </div>
+                    <div class="media-item" onclick="openModal(7)">
+                        <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 48px;">👶</span>
+                        </div>
+                        <div class="overlay">
+                            <div class="title">Baby Shower</div>
+                            <div class="meta">Feb 14, 2022 • venue</div>
+                        </div>
+                        <div class="media-tag">Photo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Media Modal -->
+    <div class="modal" id="mediaModal">
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <div class="modal-content" style="padding: 32px; max-width: 600px;">
+            <h2 id="modalTitle" style="margin-bottom: 16px;">Photo Title</h2>
+            <div id="modalContent" style="aspect-ratio: 4/3; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; font-size: 120px;">
+            </div>
+            <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 12px;">
+                <div class="stat-item"><span class="label">Date:</span><span id="modalDate">Aug 12, 2024</span></div>
+                <div class="stat-item"><span class="label">Location:</span><span id="modalLocation">Malibu Beach</span></div>
+                <div class="stat-item"><span class="label">People:</span><span id="modalPeople">Family members (8)</span></div>
+                <div class="stat-item"><span class="label">File:</span><span id="modalFile">IMG_0124.jpg</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Navigation
+        const navItems = document.querySelectorAll('.nav-item');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+        const tabTitle = document.getElementById('tab-title');
+
+        const tabTitles = {
+            builder: 'Pipeline Builder',
+            editor: 'Knowledge Graph Editor',
+            query: 'Natural Language Query',
+            visualization: 'Visualizations',
+            multimedia: 'Photo Gallery'
+        };
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const tab = item.dataset.tab;
+                
+                navItems.forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                
+                tabPanels.forEach(p => p.classList.remove('active'));
+                document.getElementById(tab).classList.add('active');
+                
+                tabTitle.textContent = tabTitles[tab];
+            });
+        });
+
+        // Filter Chips
+        const filterChips = document.querySelectorAll('.filter-chip');
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                filterChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+            });
+        });
+
+        // Media Modal Data
+        const mediaData = [
+            { title: 'Beach Day', icon: '🏖️', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', date: 'Aug 12, 2024', location: 'Malibu Beach', people: 'Family (8)', file: 'beach_0124.jpg' },
+            { title: 'Birthday Party', icon: '🎂', gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', date: 'May 20, 2024', location: 'Home', people: 'Friends & Family (15)', file: 'bday_0089.jpg' },
+            { title: 'Graduation', icon: '🎓', gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', date: 'May 20, 2024', location: 'State University', people: 'Graduates (156)', file: 'grad_0124.jpg' },
+            { title: 'Hawaii Trip', icon: '🌴', gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', date: 'Mar 10-17, 2024', location: 'Hawaii', people: 'Family (8)', file: 'hawaii_0234.jpg' },
+            { title: 'Thanksgiving', icon: '🦃', gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', date: 'Nov 23, 2023', location: "Grandma's House", people: 'Family (12)', file: 'thanks_0089.jpg' },
+            { title: 'Easter Brunch', icon: '🌸', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)', date: 'Apr 9, 2023', location: 'Home', people: 'Family (10)', file: 'easter_0012.jpg' },
+            { title: 'Christmas Morning', icon: '🎄', gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)', date: 'Dec 25, 2022', location: 'Home', people: 'Family (8)', file: 'xmas_0034.jpg' },
+            { title: 'Baby Shower', icon: '👶', gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)', date: 'Feb 14, 2022', location: 'Community Center', people: 'Friends (20)', file: 'shower_0001.jpg' }
+        ];
+
+        function openModal(index) {
+            const data = mediaData[index];
+            document.getElementById('modalTitle').textContent = data.title;
+            document.getElementById('modalContent').style.background = data.gradient;
+            document.getElementById('modalContent').textContent = data.icon;
+            document.getElementById('modalDate').textContent = data.date;
+            document.getElementById('modalLocation').textContent = data.location;
+            document.getElementById('modalPeople').textContent = data.people;
+            document.getElementById('modalFile').textContent = data.file;
+            document.getElementById('mediaModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('mediaModal').classList.remove('active');
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Close modal on background click
+        document.getElementById('mediaModal').addEventListener('click', (e) => {
+            if (e.target.id === 'mediaModal') closeModal();
+        });
+    </script>
+</body>
+</html>
