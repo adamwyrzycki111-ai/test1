@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Details - StayHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .property-gallery {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 8px;
+            height: 400px;
+            margin-bottom: var(--space-xl);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        .gallery-main {
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8rem;
+        }
+        .gallery-side {
+            display: grid;
+            grid-template-rows: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .gallery-thumb {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+        .property-info {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--space-xl);
+        }
+        .amenities-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+        }
+        .amenity-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+        }
+        .booking-card {
+            background: var(--bg-tertiary);
+            padding: var(--space-lg);
+            border-radius: var(--radius-lg);
+            position: sticky;
+            top: 90px;
+        }
+        .price-display {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        @media (max-width: 1024px) {
+            .property-info {
+                grid-template-columns: 1fr;
+            }
+            .amenities-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header"></div>
+
+    <main class="main-content full-width">
+        <div class="container">
+            <a href="properties.html" class="btn btn-ghost mb-md">← Back to Properties</a>
+            
+            <div class="property-gallery">
+                <div class="gallery-main">🏖️</div>
+                <div class="gallery-side">
+                    <div class="gallery-thumb">🏊</div>
+                    <div class="gallery-thumb">🍳</div>
+                </div>
+            </div>
+
+            <div class="property-info">
+                <div>
+                    <h1 id="propertyName">Seaside Villa Paradise</h1>
+                    <p class="text-muted mb-lg">📍 Malibu, California</p>
+                    
+                    <div class="flex gap-lg mb-xl">
+                        <div><strong>8</strong> guests</div>
+                        <div><strong>4</strong> bedrooms</div>
+                        <div><strong>3</strong> bathrooms</div>
+                    </div>
+
+                    <h3 class="mb-md">About this property</h3>
+                    <p class="text-secondary mb-xl">Stunning oceanfront villa with panoramic views. Perfect for family getaways with private beach access. Features a fully equipped kitchen, infinity pool, hot tub, and direct beach access. The spacious living areas offer breathtaking ocean views.</p>
+
+                    <h3 class="mb-md">Amenities</h3>
+                    <div class="amenities-grid mb-xl">
+                        <div class="amenity-item">📶 WiFi</div>
+                        <div class="amenity-item">🏊 Pool</div>
+                        <div class="amenity-item">🛁 Hot Tub</div>
+                        <div class="amenity-item">🏖️ Beach Access</div>
+                        <div class="amenity-item">🍳 Kitchen</div>
+                        <div class="amenity-item">🅿️ Parking</div>
+                    </div>
+
+                    <h3 class="mb-md">House Rules</h3>
+                    <div class="card">
+                        <p>No smoking, No pets, Quiet hours after 10PM</p>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="booking-card">
+                        <div class="price-display">$450<span class="text-lg font-normal text-muted">/night</span></div>
+                        
+                        <div class="form-group mt-lg">
+                            <label class="form-label">Check-in</label>
+                            <input type="date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Check-out</label>
+                            <input type="date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Guests</label>
+                            <select class="form-input">
+                                <option>1 guest</option>
+                                <option>2 guests</option>
+                                <option>4 guests</option>
+                                <option>6 guests</option>
+                                <option>8 guests</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn btn-primary w-full" onclick="openModal('requestModal')">Request to Stay</button>
+                        
+                        <p class="text-sm text-muted text-center mt-md">You won't be charged yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <!-- Request Modal -->
+    <div class="modal-overlay" id="requestModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Request to Stay</h3>
+                <button class="modal-close" onclick="closeModal('requestModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Check-in Date</label>
+                    <input type="date" class="form-input" id="requestCheckIn">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Check-out Date</label>
+                    <input type="date" class="form-input" id="requestCheckOut">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Number of Guests</label>
+                    <select class="form-input" id="requestGuests">
+                        <option>1 guest</option>
+                        <option>2 guests</option>
+                        <option>4 guests</option>
+                        <option>6 guests</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message to Host</label>
+                    <textarea class="form-textarea" placeholder="Tell the host about your trip..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('requestModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitRequest()">Submit Request</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+    <script>
+        // Load property details
+        const propertyId = parseInt(sessionStorage.getItem('selectedProperty') || '1');
+        const property = properties.find(p => p.id === propertyId);
+        if (property) {
+            document.getElementById('propertyName').textContent = property.name;
+        }
+
+        function submitRequest() {
+            alert('Stay request submitted! The host will review and get back to you.');
+            closeModal('requestModal');
+        }
+    </script>
+</body>
+</html>

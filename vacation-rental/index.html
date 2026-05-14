@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayHub - Vacation Rental Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <div id="header"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Find Your Perfect <span>Vacation Home</span></h1>
+            <p class="hero-subtitle">Discover unique properties and create unforgettable memories. From beachfront villas to mountain cabins.</p>
+            
+            <div class="hero-search">
+                <input type="text" placeholder="Where do you want to go?">
+                <input type="date" class="form-input">
+                <select class="form-input">
+                    <option>1 guest</option>
+                    <option>2 guests</option>
+                    <option>4 guests</option>
+                    <option>6+ guests</option>
+                </select>
+                <button class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Properties -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Featured Properties</h2>
+                <p class="section-subtitle">Hand-picked vacation homes for memorable getaways</p>
+            </div>
+            
+            <div class="grid-auto stagger" id="propertyGrid"></div>
+            
+            <div class="text-center" style="margin-top: var(--space-xl);">
+                <a href="properties.html" class="btn btn-secondary btn-lg">View All Properties</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section" style="background: var(--bg-tertiary);">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Book your perfect stay in three simple steps</p>
+            </div>
+            
+            <div class="grid-3">
+                <div class="card text-center">
+                    <div style="font-size: 3rem; margin-bottom: var(--space-md);">🔍</div>
+                    <h3>Search</h3>
+                    <p class="text-muted">Browse our curated collection of unique vacation homes</p>
+                </div>
+                <div class="card text-center">
+                    <div style="font-size: 3rem; margin-bottom: var(--space-md);">📅</div>
+                    <h3>Book</h3>
+                    <p class="text-muted">Select your dates and request to stay</p>
+                </div>
+                <div class="card text-center">
+                    <div style="font-size: 3rem; margin-bottom: var(--space-md);">✈️</div>
+                    <h3>Enjoy</h3>
+                    <p class="text-muted">Make memories at your perfect getaway</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Explore by Category</h2>
+            </div>
+            
+            <div class="grid-4">
+                <div class="card" style="text-align: center; cursor: pointer;">
+                    <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);">🏖️</div>
+                    <h4>Beachfront</h4>
+                    <p class="text-sm text-muted">Ocean views & direct beach access</p>
+                </div>
+                <div class="card" style="text-align: center; cursor: pointer;">
+                    <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);">🏔️</div>
+                    <h4>Mountain</h4>
+                    <p class="text-sm text-muted">Cabins & lodges for nature lovers</p>
+                </div>
+                <div class="card" style="text-align: center; cursor: pointer;">
+                    <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);">🏙️</div>
+                    <h4>Urban</h4>
+                    <p class="text-sm text-muted">City apartments & lofts</p>
+                </div>
+                <div class="card" style="text-align: center; cursor: pointer;">
+                    <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);">🏞️</div>
+                    <h4>Lakefront</h4>
+                    <p class="text-sm text-muted">Water activities & tranquility</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section" style="background: var(--primary);">
+        <div class="container text-center">
+            <h2 style="color: white; margin-bottom: var(--space-md);">List Your Property</h2>
+            <p style="color: rgba(255,255,255,0.8); margin-bottom: var(--space-lg); max-width: 600px; margin-left: auto; margin-right: auto;">
+                Join our network of property owners and start earning. We handle the marketing, bookings, and guest communication.
+            </p>
+            <a href="owner-dashboard.html" class="btn btn-lg" style="background: white; color: var(--primary);">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer"></div>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

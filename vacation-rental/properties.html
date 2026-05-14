@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Properties - StayHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div id="header"></div>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Browse Properties</h1>
+                <p class="page-subtitle">Find your perfect vacation home from our curated collection</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label class="filter-label">Search</label>
+                    <input type="text" class="form-input" id="searchInput" placeholder="Search properties..." oninput="filterProperties()">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select class="filter-select" id="statusFilter" onchange="filterProperties()">
+                        <option value="">All Status</option>
+                        <option value="available">Available</option>
+                        <option value="booked">Booked</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Location</label>
+                    <select class="filter-select" id="locationFilter" onchange="filterProperties()">
+                        <option value="">All Locations</option>
+                        <option value="California">California</option>
+                        <option value="New York">New York</option>
+                        <option value="Colorado">Colorado</option>
+                        <option value="Hawaii">Hawaii</option>
+                        <option value="Arizona">Arizona</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Property Grid -->
+            <div class="grid-auto stagger" id="propertyGrid"></div>
+        </div>
+    </main>
+
+    <div id="footer"></div>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

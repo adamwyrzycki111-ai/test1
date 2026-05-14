@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stay Requests - StayHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div id="sidebar"></div>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Stay Requests</h1>
+                <p class="page-subtitle">Manage booking requests from guests</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid mb-xl">
+                <div class="widget-card">
+                    <div class="widget-card-icon warning">⏳</div>
+                    <div class="widget-card-value" id="pendingCount">3</div>
+                    <div class="widget-card-label">Pending</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon success">✅</div>
+                    <div class="widget-card-value">1</div>
+                    <div class="widget-card-label">Approved</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon error">❌</div>
+                    <div class="widget-card-value">0</div>
+                    <div class="widget-card-label">Declined</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon primary">🎁</div>
+                    <div class="widget-card-value">1</div>
+                    <div class="widget-card-label">Charitable</div>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="tabs">
+                <button class="tab active">All Requests</button>
+                <button class="tab">Pending</button>
+                <button class="tab">Approved</button>
+                <button class="tab">Charitable</button>
+            </div>
+
+            <!-- Requests Table -->
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Guest</th>
+                            <th>Property</th>
+                            <th>Dates</th>
+                            <th>Guests</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestList">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Charitable Section -->
+            <h3 class="mb-lg mt-xl">Charitable Stay Requests</h3>
+            <div class="card">
+                <div class="flex justify-between items-center mb-lg">
+                    <div>
+                        <h4>Charity Foundation - Beach Stay Request</h4>
+                        <p class="text-sm text-muted">Guests: 4 | Aug 1-7, 2026</p>
+                    </div>
+                    <span class="badge badge-primary">Pending Review</span>
+                </div>
+                <p class="text-secondary mb-md">Request for underprivileged families to enjoy a beach vacation. This represents our commitment to community impact.</p>
+                <div class="flex gap-sm">
+                    <button class="btn btn-success">Approve</button>
+                    <button class="btn btn-error">Decline</button>
+                    <button class="btn btn-ghost">Request More Info</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
