@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrailerConfig Pro - Floor Plan Configurator</title>
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           DESIGN SYSTEM
+           ============================================ */
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --bg-canvas: #1e293b;
+            --bg-panel: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --accent: #8b5cf6;
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
+            --radius: 8px;
+            --radius-lg: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        .app {
+            display: grid;
+            grid-template-columns: 280px 1fr 300px;
+            height: 100vh;
+        }
+
+        /* Sidebar - Component Library */
+        .sidebar-left {
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span { color: var(--primary-light); }
+
+        .search-box {
+            margin-top: 12px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .component-categories {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .category {
+            margin-bottom: 16px;
+        }
+
+        .category-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .component-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 8px;
+            text-align: center;
+            cursor: grab;
+            transition: all 0.2s;
+            font-size: 0.8125rem;
+        }
+
+        .component-item:hover {
+            border-color: var(--primary);
+            background: var(--bg-hover);
+        }
+
+        .component-item .icon {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            background: var(--bg-canvas);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-toolbar {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-panel);
+            padding: 4px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .toolbar-btn {
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .toolbar-btn.active { background: var(--primary); color: white; }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Inspector Panel */
+        .sidebar-right {
+            background: var(--bg-panel);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .inspector-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .inspector-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+
+        .trailer-config {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .config-field label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .config-field input {
+            width: 100%;
+            padding: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .selected-info {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 12px;
+        }
+
+        .selected-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .selected-type {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .properties-list {
+            margin-top: 12px;
+        }
+
+        .property-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .property-row label {
+            width: 60px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .property-row input {
+            flex: 1;
+            padding: 6px 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.8125rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: var(--radius);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--bg-hover); }
+        .btn-danger { background: var(--error); color: white; }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* JSON Output */
+        .json-output {
+            padding: 16px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .json-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .json-code {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success { border-color: var(--success); }
+        .toast.success::before { content: '✓'; color: var(--success); }
+        .toast.error { border-color: var(--error); }
+        .toast.error::before { content: '✕'; color: var(--error); }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Legend */
+        .legend {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        /* Zoom Controls */
+        .zoom-display {
+            background: var(--bg-panel);
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 4px;
+            min-width: 160px;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .context-menu.active { display: block; }
+
+        .context-item {
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .context-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .context-item .shortcut { color: var(--text-muted); font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Left Sidebar - Component Library -->
+        <aside class="sidebar-left">
+            <div class="sidebar-header">
+                <div class="logo">🚛 Trailer<span>Config</span> Pro</div>
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search components..." id="componentSearch">
+                </div>
+            </div>
+            <div class="component-categories" id="componentLibrary">
+                <!-- Rendered by JS -->
+            </div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="canvas-area">
+            <div class="canvas-toolbar">
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" onclick="setTool('select')" id="btnSelect" title="Select (V)">Select</button>
+                    <button class="toolbar-btn" onclick="setTool('pan')" id="btnPan" title="Pan (H)">Pan</button>
+                    <button class="toolbar-btn" onclick="setTool('add')" id="btnAdd" title="Add (A)">Add</button>
+                </div>
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" onclick="undo()" title="Undo (Ctrl+Z)">⟲ Undo</button>
+                    <button class="toolbar-btn" onclick="redo()" title="Redo (Ctrl+Y)">⟳ Redo</button>
+                </div>
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                    <button class="toolbar-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                    <button class="toolbar-btn" onclick="fitToScreen()" title="Fit to Screen">⊡</button>
+                    <span class="zoom-display" id="zoomDisplay">100%</span>
+                </div>
+            </div>
+            <div id="canvas-container"></div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background: #64748b"></div>Interior</div>
+                <div class="legend-item"><div class="legend-color" style="background: #334155"></div>Exterior</div>
+                <div class="legend-item"><div class="legend-color" style="background: #2563eb"></div>Selected</div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar - Inspector -->
+        <aside class="sidebar-right">
+            <div class="inspector-section">
+                <h3 class="inspector-title">Trailer Dimensions</h3>
+                <div class="trailer-config">
+                    <div class="config-field">
+                        <label>Length (mm)</label>
+                        <input type="number" id="trailerLength" value="16000" min="6000" max="24000" step="100">
+                    </div>
+                    <div class="config-field">
+                        <label>Width (mm)</label>
+                        <input type="number" id="trailerWidth" value="2400" min="1800" max="3000" step="50">
+                    </div>
+                </div>
+            </div>
+
+            <div class="inspector-section" id="selectedPanel" style="display: none;">
+                <h3 class="inspector-title">Selected Component</h3>
+                <div class="selected-info">
+                    <div class="selected-name" id="selectedName">-</div>
+                    <div class="selected-type" id="selectedType">-</div>
+                </div>
+                <div class="properties-list">
+                    <div class="property-row">
+                        <label>Label</label>
+                        <input type="text" id="propLabel">
+                    </div>
+                    <div class="property-row">
+                        <label>X (mm)</label>
+                        <input type="number" id="propX">
+                    </div>
+                    <div class="property-row">
+                        <label>Y (mm)</label>
+                        <input type="number" id="propY">
+                    </div>
+                    <div class="property-row">
+                        <label>Width</label>
+                        <input type="number" id="propWidth">
+                    </div>
+                    <div class="property-row">
+                        <label>Height</label>
+                        <input type="number" id="propHeight">
+                    </div>
+                    <div class="property-row">
+                        <label>Rotation</label>
+                        <input type="number" id="propRotation" step="15">
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="duplicateSelected()">Duplicate</button>
+                    <button class="btn btn-danger" onclick="deleteSelected()">Delete</button>
+                </div>
+            </div>
+
+            <div class="inspector-section" style="display: none;" id="noSelection">
+                <p style="color: var(--text-muted); font-size: 0.875rem;">Select a component to edit its properties</p>
+            </div>
+
+            <div class="json-output">
+                <div class="json-title">
+                    <span>Configuration JSON</span>
+                    <button class="btn btn-primary btn-sm" onclick="exportJSON()">Export</button>
+                </div>
+                <pre class="json-code" id="jsonOutput"></pre>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-item" onclick="copyComponent()">Copy <span class="shortcut">Ctrl+C</span></div>
+        <div class="context-item" onclick="pasteComponent()">Paste <span class="shortcut">Ctrl+V</span></div>
+        <div class="context-item" onclick="duplicateSelected()">Duplicate <span class="shortcut">Ctrl+D</span></div>
+        <div class="context-item" onclick="bringToFront()">Bring to Front</div>
+        <div class="context-item" onclick="sendToBack()">Send to Back</div>
+        <div class="context-item" onclick="deleteSelected()">Delete <span class="shortcut">Del</span></div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION & TYPES
+        // ============================================
+        
+        const COMPONENT_LIBRARY = {
+            walls: [
+                { id: 'wall-solid', name: 'Solid Wall', icon: '🧱', width: 500, height: 50, category: 'walls' },
+                { id: 'wall-panel', name: 'Panel Wall', icon: '📐', width: 500, height: 50, category: 'walls' },
+                { id: 'wall-divider', name: 'Divider', icon: '➖', width: 300, height: 30, category: 'walls' },
+            ],
+            doors: [
+                { id: 'door-single', name: 'Single Door', icon: '🚪', width: 900, height: 50, category: 'doors' },
+                { id: 'door-double', name: 'Double Door', icon: '🚪🚪', width: 1800, height: 50, category: 'doors' },
+                { id: 'door-sliding', name: 'Sliding', icon: '↔️', width: 1500, height: 50, category: 'doors' },
+                { id: 'door-rollup', name: 'Roll Up', icon: '⬆️', width: 2000, height: 50, category: 'doors' },
+            ],
+            windows: [
+                { id: 'window-fixed', name: 'Fixed', icon: '🪟', width: 600, height: 30, category: 'windows' },
+                { id: 'window-operable', name: 'Operable', icon: '🪟', width: 600, height: 30, category: 'windows' },
+                { id: 'window-escape', name: 'Escape', icon: '🚨', width: 500, height: 30, category: 'windows' },
+            ],
+            cabinets: [
+                { id: 'cabinet-upper', name: 'Upper Cabinet', icon: '🗄️', width: 600, height: 400, category: 'cabinets' },
+                { id: 'cabinet-lower', name: 'Lower Cabinet', icon: '🗄️', width: 600, height: 300, category: 'cabinets' },
+                { id: 'cabinet-tall', name: 'Tall Cabinet', icon: '🗄️', width: 500, height: 1000, category: 'cabinets' },
+                { id: 'cabinet-mobile', name: 'Mobile', icon: '🗄️', width: 400, height: 250, category: 'cabinets' },
+            ],
+            equipment: [
+                { id: 'fridge', name: 'Refrigerator', icon: '🧊', width: 700, height: 700, category: 'equipment' },
+                { id: 'stove', name: 'Stove', icon: '🍳', width: 600, height: 600, category: 'equipment' },
+                { id: 'sink', name: 'Sink', icon: '🚰', width: 500, height: 500, category: 'equipment' },
+                { id: 'ac-unit', name: 'AC Unit', icon: '❄️', width: 700, height: 300, category: 'equipment' },
+                { id: 'generator', name: 'Generator', icon: '⚡', width: 600, height: 400, category: 'equipment' },
+                { id: 'water-heater', name: 'Water Heater', icon: '🔥', width: 400, height: 400, category: 'equipment' },
+            ],
+            electrical: [
+                { id: 'outlet', name: 'Outlet', icon: '🔌', width: 80, height: 80, category: 'electrical' },
+                { id: 'switch', name: 'Switch', icon: '🔘', width: 80, height: 80, category: 'electrical' },
+                { id: 'panel-main', name: 'Main Panel', icon: '⚡', width: 400, height: 200, category: 'electrical' },
+                { id: 'led-light', name: 'LED Light', icon: '💡', width: 300, height: 30, category: 'electrical' },
+            ],
+            plumbing: [
+                { id: 'fresh-tank', name: 'Fresh Tank', icon: '💧', width: 400, height: 400, category: 'plumbing' },
+                { id: 'waste-tank', name: 'Waste Tank', icon: '🟤', width: 400, height: 400, category: 'plumbing' },
+                { id: 'pump', name: 'Water Pump', icon: '🔄', width: 250, height: 250, category: 'plumbing' },
+                { id: 'shower', name: 'Shower', icon: '🚿', width: 800, height: 800, category: 'plumbing' },
+            ],
+            furniture: [
+                { id: 'sofa', name: 'Sofa', icon: '🛋️', width: 1800, height: 800, category: 'furniture' },
+                { id: 'dinette', name: 'Dinette', icon: '🪑', width: 1200, height: 800, category: 'furniture' },
+                { id: 'bed-single', name: 'Single Bed', icon: '🛏️', width: 1000, height: 2000, category: 'furniture' },
+                { id: 'bed-queen', name: 'Queen Bed', icon: '🛏️', width: 1500, height: 2000, category: 'furniture' },
+                { id: 'desk', name: 'Desk', icon: '🖥️', width: 1200, height: 600, category: 'furniture' },
+            ],
+        };
+
+        // Component colors by category
+        const CATEGORY_COLORS = {
+            walls: '#64748b',
+            doors: '#8b5cf6',
+            windows: '#3b82f6',
+            cabinets: '#10b981',
+            equipment: '#f59e0b',
+            electrical: '#ef4444',
+            plumbing: '#06b6d4',
+            furniture: '#ec4899',
+        };
+
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+
+        let state = {
+            trailer: { length: 16000, width: 2400 },
+            components: [],
+            selectedId: null,
+            tool: 'select',
+            zoom: 1,
+            pan: { x: 0, y: 0 },
+            gridSize: 100,
+            history: [],
+            historyIndex: -1,
+            clipboard: null,
+        };
+
+        let stage, layer, gridLayer, trailerLayer, componentLayer, transformer;
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            stage = new Konva.Stage({
+                container: 'canvas-container',
+                width: width,
+                height: height,
+                draggable: false,
+            });
+
+            gridLayer = new Konva.Layer();
+            trailerLayer = new Konva.Layer();
+            componentLayer = new Konva.Layer();
+            
+            stage.add(gridLayer);
+            stage.add(trailerLayer);
+            stage.add(componentLayer);
+
+            // Transformer for resizing
+            transformer = new Konva.Transformer({
+                rotateEnabled: true,
+                enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'middle-left', 'middle-right', 'top-center', 'bottom-center'],
+                boundBoxFunc: (oldBox, newBox) => {
+                    if (newBox.width < 50 || newBox.height < 50) return oldBox;
+                    return newBox;
+                },
+            });
+            componentLayer.add(transformer);
+
+            renderComponentLibrary();
+            drawGrid();
+            drawTrailer();
+            updateJSON();
+            setupEventListeners();
+
+            // Handle resize
+            window.addEventListener('resize', () => {
+                stage.width(container.clientWidth);
+                stage.height(container.clientHeight);
+            });
+        }
+
+        function renderComponentLibrary() {
+            const library = document.getElementById('componentLibrary');
+            let html = '';
+
+            for (const [category, components] of Object.entries(COMPONENT_LIBRARY)) {
+                html += `
+                    <div class="category">
+                        <div class="category-title">${category}</div>
+                        <div class="component-grid">
+                            ${components.map(c => `
+                                <div class="component-item" draggable="true" data-component-id="${c.id}">
+                                    <span class="icon">${c.icon}</span>
+                                    ${c.name}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            library.innerHTML = html;
+
+            // Setup drag and drop
+            document.querySelectorAll('.component-item').forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('componentId', item.dataset.componentId);
+                });
+            });
+        }
+
+        // ============================================
+        // CANVAS RENDERING
+        // ============================================
+
+        function drawGrid() {
+            gridLayer.destroyChildren();
+            const gridSize = state.gridSize * state.zoom;
+            const width = stage.width();
+            const height = stage.height();
+
+            for (let x = 0; x < width; x += gridSize) {
+                gridLayer.add(new Konva.Line({
+                    points: [x, 0, x, height],
+                    stroke: '#334155',
+                    strokeWidth: 0.5,
+                    dash: [4, 4],
+                }));
+            }
+
+            for (let y = 0; y < height; y += gridSize) {
+                gridLayer.add(new Konva.Line({
+                    points: [0, y, width, y],
+                    stroke: '#334155',
+                    strokeWidth: 0.5,
+                    dash: [4, 4],
+                }));
+            }
+            gridLayer.batchDraw();
+        }
+
+        function drawTrailer() {
+            trailerLayer.destroyChildren();
+            const sw = state.trailer.width * state.zoom;
+            const sl = state.trailer.length * state.zoom;
+            const cx = (stage.width() - sw) / 2;
+            const cy = (stage.height() - sl) / 2;
+
+            // Exterior
+            const exterior = new Konva.Rect({
+                x: cx - 20,
+                y: cy - 20,
+                width: sw + 40,
+                height: sl + 40,
+                fill: '#334155',
+                cornerRadius: 20,
+            });
+            trailerLayer.add(exterior);
+
+            // Interior
+            const interior = new Konva.Rect({
+                x: cx,
+                y: cy,
+                width: sw,
+                height: sl,
+                fill: '#1e293b',
+                stroke: '#64748b',
+                strokeWidth: 2,
+                cornerRadius: 10,
+            });
+            trailerLayer.add(interior);
+
+            // Dimension labels
+            trailerLayer.add(new Konva.Text({
+                x: cx,
+                y: cy - 50,
+                text: `${state.trailer.length}mm`,
+                fontSize: 14,
+                fill: '#94a3b8',
+                fontFamily: 'JetBrains Mono',
+            }));
+
+            trailerLayer.add(new Konva.Text({
+                x: cx - 70,
+                y: cy,
+                text: `${state.trailer.width}mm`,
+                fontSize: 14,
+                fill: '#94a3b8',
+                fontFamily: 'JetBrains Mono',
+                rotation: -90,
+            }));
+
+            trailerLayer.batchDraw();
+        }
+
+        function addComponent(componentDef, x, y) {
+            const id = `${componentDef.id}-${Date.now()}`;
+            const scaledWidth = componentDef.width * state.zoom;
+            const scaledHeight = componentDef.height * state.zoom;
+            const baseWidth = componentDef.width;
+            const baseHeight = componentDef.height;
+
+            const group = new Konva.Group({
+                id: id,
+                x: x,
+                y: y,
+                draggable: true,
+                name: 'component',
+            });
+
+            const rect = new Konva.Rect({
+                width: scaledWidth,
+                height: scaledHeight,
+                fill: CATEGORY_COLORS[componentDef.category] || '#64748b',
+                stroke: '#2563eb',
+                strokeWidth: 2,
+                cornerRadius: 4,
+            });
+
+            const label = new Konva.Text({
+                text: componentDef.name,
+                fontSize: 12,
+                fill: 'white',
+                width: scaledWidth,
+                align: 'center',
+                y: scaledHeight / 2 - 6,
+            });
+
+            group.add(rect);
+            group.add(label);
+
+            // Store component data
+            group.setAttr('_componentData', {
+                ...componentDef,
+                id: id,
+                x: x / state.zoom,
+                y: y / state.zoom,
+                width: baseWidth,
+                height: baseHeight,
+                rotation: 0,
+            });
+
+            group.on('dragmove', () => {
+                const pos = group.position();
+                // Snap to grid
+                const snappedX = Math.round(pos.x / state.gridSize) * state.gridSize;
+                const snappedY = Math.round(pos.y / state.gridSize) * state.gridSize;
+                group.position({ x: snappedX, y: snappedY });
+                
+                // Update data
+                const data = group.getAttr('_componentData');
+                data.x = snappedX / state.zoom;
+                data.y = snappedY / state.zoom;
+            });
+
+            group.on('click tap', () => {
+                selectComponent(group);
+            });
+
+            group.on('transformend', () => {
+                const scaleX = group.scaleX();
+                const scaleY = group.scaleY();
+                group.scale({ x: 1, y: 1 });
+                
+                const data = group.getAttr('_componentData');
+                data.width = Math.round(data.width * scaleX);
+                data.height = Math.round(data.height * scaleY);
+                data.rotation = Math.round(group.rotation());
+                
+                rect.width(data.width * state.zoom);
+                rect.height(data.height * state.zoom);
+                
+                updateJSON();
+            });
+
+            componentLayer.add(group);
+            componentLayer.batchDraw();
+            
+            state.components.push(group.getAttr('_componentData'));
+            updateJSON();
+            
+            return group;
+        }
+
+        // ============================================
+        // SELECTION & INSPECTOR
+        // ============================================
+
+        function selectComponent(group) {
+            state.selectedId = group?.id() || null;
+            transformer.nodes(group ? [group] : []);
+            componentLayer.batchDraw();
+
+            const panel = document.getElementById('selectedPanel');
+            const noSelection = document.getElementById('noSelection');
+
+            if (group) {
+                const data = group.getAttr('_componentData');
+                panel.style.display = 'block';
+                noSelection.style.display = 'none';
+
+                document.getElementById('selectedName').textContent = data.name;
+                document.getElementById('selectedType').textContent = data.category;
+                document.getElementById('propLabel').value = data.name || '';
+                document.getElementById('propX').value = Math.round(data.x);
+                document.getElementById('propY').value = Math.round(data.y);
+                document.getElementById('propWidth').value = data.width;
+                document.getElementById('propHeight').value = data.height;
+                document.getElementById('propRotation').value = data.rotation;
+            } else {
+                panel.style.display = 'none';
+                noSelection.style.display = 'block';
+            }
+        }
+
+        // ============================================
+        // TOOLS
+        // ============================================
+
+        function setTool(tool) {
+            state.tool = tool;
+            document.querySelectorAll('.toolbar-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn' + tool.charAt(0).toUpperCase() + tool.slice(1)).classList.add('active');
+
+            stage.draggable(tool === 'pan');
+            
+            if (tool === 'select') {
+                stage.draggable(false);
+                componentLayer.find('.component').forEach(c => c.draggable(true));
+            }
+        }
+
+        // ============================================
+        // ZOOM & PAN
+        // ============================================
+
+        function zoomIn() {
+            state.zoom = Math.min(3, state.zoom + 0.1);
+            applyZoom();
+        }
+
+        function zoomOut() {
+            state.zoom = Math.max(0.3, state.zoom - 0.1);
+            applyZoom();
+        }
+
+        function applyZoom() {
+            state.zoom = Math.round(state.zoom * 10) / 10;
+            document.getElementById('zoomDisplay').textContent = Math.round(state.zoom * 100) + '%';
+            
+            drawTrailer();
+            
+            // Scale components
+            componentLayer.find('.component').forEach(group => {
+                const data = group.getAttr('_componentData');
+                const rect = group.findOne('Rect');
+                rect.width(data.width * state.zoom);
+                rect.height(data.height * state.zoom);
+            });
+            
+            componentLayer.batchDraw();
+            drawGrid();
+        }
+
+        function fitToScreen() {
+            state.zoom = 1;
+            applyZoom();
+            stage.x(0);
+            stage.y(0);
+        }
+
+        // ============================================
+        // ACTIONS
+        // ============================================
+
+        function deleteSelected() {
+            if (state.selectedId) {
+                const node = componentLayer.findOne('#' + state.selectedId);
+                if (node) {
+                    node.destroy();
+                    state.components = state.components.filter(c => c.id !== state.selectedId);
+                    selectComponent(null);
+                    updateJSON();
+                    showToast('Component deleted', 'success');
+                }
+            }
+        }
+
+        function duplicateSelected() {
+            if (state.selectedId) {
+                const node = componentLayer.findOne('#' + state.selectedId);
+                if (node) {
+                    const data = node.getAttr('_componentData');
+                    const newData = { ...data, id: `${data.id}-copy-${Date.now()}` };
+                    
+                    const compDef = COMPONENT_LIBRARY[data.category]?.find(c => c.id === data.id.split('-')[0]) || data;
+                    const newX = data.x + 200;
+                    const newY = data.y;
+                    
+                    saveHistory();
+                    addComponent({ ...compDef, ...newData }, newX * state.zoom, newY * state.zoom);
+                    showToast('Component duplicated', 'success');
+                }
+            }
+        }
+
+        function bringToFront() {
+            if (state.selectedId) {
+                const node = componentLayer.findOne('#' + state.selectedId);
+                if (node) {
+                    node.zIndex(componentLayer.children.length);
+                    componentLayer.batchDraw();
+                }
+            }
+        }
+
+        function sendToBack() {
+            if (state.selectedId) {
+                const node = componentLayer.findOne('#' + state.selectedId);
+                if (node) {
+                    node.zIndex(0);
+                    componentLayer.batchDraw();
+                }
+            }
+        }
+
+        // ============================================
+        // UNDO/REDO
+        // ============================================
+
+        function saveHistory() {
+            state.history = state.history.slice(0, state.historyIndex + 1);
+            state.history.push(JSON.stringify(state.components));
+            state.historyIndex++;
+        }
+
+        function undo() {
+            if (state.historyIndex > 0) {
+                state.historyIndex--;
+                restoreFromHistory();
+            }
+        }
+
+        function redo() {
+            if (state.historyIndex < state.history.length - 1) {
+                state.historyIndex++;
+                restoreFromHistory();
+            }
+        }
+
+        function restoreFromHistory() {
+            const saved = JSON.parse(state.history[state.historyIndex]);
+            // Clear current components
+            componentLayer.find('.component').forEach(c => c.destroy());
+            // Restore
+            saved.forEach(comp => {
+                const componentDef = { ...comp, name: comp.name };
+                addComponent(componentDef, comp.x * state.zoom, comp.y * state.zoom);
+            });
+            selectComponent(null);
+            showToast('Undo/Redo applied', 'success');
+        }
+
+        // ============================================
+        // JSON EXPORT
+        // ============================================
+
+        function updateJSON() {
+            const output = {
+                trailer: {
+                    length: state.trailer.length,
+                    width: state.trailer.width,
+                },
+                components: state.components.map(c => ({
+                    id: c.id,
+                    type: c.id.split('-')[0],
+                    name: c.name,
+                    category: c.category,
+                    x: Math.round(c.x),
+                    y: Math.round(c.y),
+                    width: c.width,
+                    height: c.height,
+                    rotation: c.rotation || 0,
+                })),
+            };
+            document.getElementById('jsonOutput').textContent = JSON.stringify(output, null, 2);
+        }
+
+        function exportJSON() {
+            const output = {
+                trailer: {
+                    length: state.trailer.length,
+                    width: state.trailer.width,
+                },
+                components: state.components.map(c => ({
+                    id: c.id,
+                    type: c.id.split('-')[0],
+                    name: c.name,
+                    category: c.category,
+                    x: Math.round(c.x),
+                    y: Math.round(c.y),
+                    width: c.width,
+                    height: c.height,
+                    rotation: c.rotation || 0,
+                    material: c.material || null,
+                    manufacturingData: c.manufacturingData || null,
+                })),
+            };
+            
+            const blob = new Blob([JSON.stringify(output, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'trailer-layout.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('Configuration exported', 'success');
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
+        function setupEventListeners() {
+            const container = document.getElementById('canvas-container');
+
+            // Drop on canvas
+            container.addEventListener('dragover', e => e.preventDefault());
+            container.addEventListener('drop', e => {
+                e.preventDefault();
+                const componentId = e.dataTransfer.getData('componentId');
+                if (componentId) {
+                    // Find component definition
+                    let compDef = null;
+                    for (const components of Object.values(COMPONENT_LIBRARY)) {
+                        compDef = components.find(c => c.id === componentId);
+                        if (compDef) break;
+                    }
+                    
+                    if (compDef) {
+                        saveHistory();
+                        addComponent(compDef, e.offsetX, e.offsetY);
+                        showToast('Component added', 'success');
+                    }
+                }
+            });
+
+            // Canvas click to deselect
+            stage.on('click tap', e => {
+                if (e.target === stage || e.target.getParent() === trailerLayer) {
+                    selectComponent(null);
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                    deleteSelected();
+                }
+                if (e.key === 'v') setTool('select');
+                if (e.key === 'h') setTool('pan');
+                if (e.key === 'a') setTool('add');
+                if (e.ctrlKey && e.key === 'z') undo();
+                if (e.ctrlKey && e.key === 'y') redo();
+                if (e.ctrlKey && e.key === 'd') { e.preventDefault(); duplicateSelected(); }
+            });
+
+            // Trailer config changes
+            document.getElementById('trailerLength').addEventListener('change', e => {
+                state.trailer.length = parseInt(e.target.value);
+                drawTrailer();
+                updateJSON();
+            });
+
+            document.getElementById('trailerWidth').addEventListener('change', e => {
+                state.trailer.width = parseInt(e.target.value);
+                drawTrailer();
+                updateJSON();
+            });
+
+            // Property changes
+            ['propLabel', 'propX', 'propY', 'propWidth', 'propHeight', 'propRotation'].forEach(id => {
+                document.getElementById(id).addEventListener('change', e => {
+                    if (!state.selectedId) return;
+                    
+                    const group = componentLayer.findOne('#' + state.selectedId);
+                    if (!group) return;
+                    
+                    const data = group.getAttr('_componentData');
+                    const val = parseFloat(e.target.value);
+                    
+                    if (id === 'propLabel') data.name = val;
+                    if (id === 'propX') { data.x = val; group.x(val * state.zoom); }
+                    if (id === 'propY') { data.y = val; group.y(val * state.zoom); }
+                    if (id === 'propWidth') {
+                        data.width = val;
+                        group.findOne('Rect').width(val * state.zoom);
+                    }
+                    if (id === 'propHeight') {
+                        data.height = val;
+                        group.findOne('Rect').height(val * state.zoom);
+                    }
+                    if (id === 'propRotation') {
+                        data.rotation = val;
+                        group.rotation(val);
+                    }
+                    
+                    componentLayer.batchDraw();
+                    updateJSON();
+                });
+            });
+
+            // Context menu
+            stage.on('contextmenu', e => {
+                e.evt.preventDefault();
+                const menu = document.getElementById('contextMenu');
+                menu.classList.add('active');
+                menu.style.left = e.evt.clientX + 'px';
+                menu.style.top = e.evt.clientY + 'px';
+            });
+
+            document.addEventListener('click', () => {
+                document.getElementById('contextMenu').classList.remove('active');
+            });
+        }
+
+        // ============================================
+        // UTILITIES
+        // ============================================
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function copyComponent() {
+            if (state.selectedId) {
+                const node = componentLayer.findOne('#' + state.selectedId);
+                if (node) {
+                    state.clipboard = node.getAttr('_componentData');
+                    showToast('Component copied', 'success');
+                }
+            }
+        }
+
+        function pasteComponent() {
+            if (state.clipboard) {
+                saveHistory();
+                const newData = { ...state.clipboard, id: `${state.clipboard.id}-paste-${Date.now()}` };
+                addComponent(newData, (newData.x + 300) * state.zoom, newData.y * state.zoom);
+                showToast('Component pasted', 'success');
+            }
+        }
+
+        // Initialize
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
