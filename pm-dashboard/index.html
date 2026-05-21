@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpsAI - Project Management Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        dark: { 950: '#0a0c10', 900: '#111217', 800: '#1a1d26', 750: '#22262f', 700: '#2a2f3a', 600: '#363c49', 500: '#454c5a' },
+                        brand: { DEFAULT: '#6366f1', light: '#818cf8', dark: '#4f46e5' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { scrollbar-width: thin; scrollbar-color: #363c49 transparent; }
+        body { font-family: 'Inter', sans-serif; background: #0a0c10; color: #e2e8f0; }
+        .glass { background: rgba(26, 29, 38, 0.7); backdrop-filter: blur(20px); }
+        .card { background: #111217; border: 1px solid #22262f; border-radius: 12px; transition: all 0.2s; }
+        .card:hover { border-color: #363c49; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; color: #94a3b8; transition: all 0.15s; cursor: pointer; }
+        .nav-item:hover { background: rgba(99, 102, 241, 0.1); color: #e2e8f0; }
+        .nav-item.active { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .status-green { background: #10b981; }
+        .status-yellow { background: #f59e0b; }
+        .status-red { background: #ef4444; }
+        .risk-low { color: #10b981; }
+        .risk-medium { color: #f59e0b; }
+        .risk-high { color: #ef4444; }
+        .metric-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .confidence-bar { height: 6px; border-radius: 3px; background: #22262f; overflow: hidden; }
+        .confidence-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .animate-fade { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse-glow { animation: glow 2s ease-in-out infinite; }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); } 50% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); } }
+    </style>
+</head>
+<body class="min-h-screen flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-dark-950 border-r border-dark-700 flex flex-col h-screen fixed left-0 top-0 z-40">
+        <div class="p-5 border-b border-dark-700">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-brand flex items-center justify-center">
+                    <i data-lucide="brain" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight">OpsAI</h1>
+                    <span class="text-xs text-gray-500">PM Control</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto" id="mainNav">
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-2">Main</div>
+            <div class="nav-item active" data-page="dashboard"><i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span></div>
+            <div class="nav-item" data-page="projects"><i data-lucide="folder-kanban" class="w-5 h-5"></i><span>Active Projects</span></div>
+            <div class="nav-item" data-page="queue"><i data-lucide="sparkles" class="w-5 h-5"></i><span>AI Review Queue</span><span class="ml-auto bg-brand/20 text-brand-light text-xs px-2 py-0.5 rounded-full">12</span></div>
+            <div class="nav-item" data-page="risks"><i data-lucide="alert-triangle" class="w-5 h-5"></i><span>Risks & Escalations</span><span class="ml-auto bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded-full">4</span></div>
+            
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-2 mt-4">Tracking</div>
+            <div class="nav-item" data-page="timeline"><i data-lucide="gantt-chart" class="w-5 h-5"></i><span>Timeline Tracker</span></div>
+            <div class="nav-item" data-page="slack"><i data-lucide="message-square" class="w-5 h-5"></i><span>Slack Activity</span></div>
+            <div class="nav-item" data-page="email"><i data-lucide="mail" class="w-5 h-5"></i><span>Email Activity</span></div>
+            <div class="nav-item" data-page="meetings"><i data-lucide="video" class="w-5 h-5"></i><span>Meeting Summaries</span></div>
+            
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 mb-2 mt-4">Resources</div>
+            <div class="nav-item" data-page="vendors"><i data-lucide="users" class="w-5 h-5"></i><span>Vendors</span></div>
+            <div class="nav-item" data-page="reports"><i data-lucide="file-text" class="w-5 h-5"></i><span>Reports</span></div>
+            <div class="nav-item" data-page="settings"><i data-lucide="settings" class="w-5 h-5"></i><span>Settings</span></div>
+        </nav>
+        
+        <div class="p-4 border-t border-dark-700">
+            <div class="flex items-center gap-3 p-3 rounded-lg bg-dark-800">
+                <div class="w-9 h-9 rounded-full bg-brand flex items-center justify-center text-sm font-bold">KP</div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium truncate">Kate Peterson</div>
+                    <div class="text-xs text-gray-500">Sr. PM</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 flex-1">
+        <!-- Header -->
+        <header class="h-16 bg-dark-950 border-b border-dark-700 flex items-center justify-between px-6 sticky top-0 z-30">
+            <div class="flex items-center gap-4 flex-1">
+                <div class="relative max-w-md flex-1">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    <input type="text" placeholder="Search projects, vendors, activities..." class="w-full bg-dark-800 border border-dark-600 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-brand">
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- AI Status -->
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brand/10 border border-brand/20">
+                    <div class="w-2 h-2 rounded-full bg-brand pulse-glow"></div>
+                    <span class="text-sm text-brand-light">AI Active</span>
+                </div>
+                
+                <!-- Notifications -->
+                <button class="relative p-2 rounded-lg hover:bg-dark-800 transition">
+                    <i data-lucide="bell" class="w-5 h-5 text-gray-400"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+                
+                <!-- Quick Actions -->
+                <button class="p-2 rounded-lg hover:bg-dark-800 transition">
+                    <i data-lucide="plus" class="w-5 h-5 text-gray-400"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="p-6" id="page-dashboard">
+            <!-- Page Title -->
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold">Operations Overview</h2>
+                <p class="text-gray-500 text-sm mt-1">Real-time project health and AI-assisted workflow monitoring</p>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-6 gap-4 mb-6">
+                <div class="card p-4 animate-fade">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-400 text-xs">Active Projects</span>
+                        <i data-lucide="folder-kanban" class="w-4 h-4 text-gray-500"></i>
+                    </div>
+                    <div class="metric-value text-2xl text-white">28</div>
+                    <div class="text-xs text-green-400 mt-1">+3 this week</div>
+                </div>
+                <div class="card p-4 animate-fade">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-400 text-xs">Pending Approvals</span>
+                        <i data-lucide="clipboard-check" class="w-4 h-4 text-gray-500"></i>
+                    </div>
+                    <div class="metric-value text-2xl text-white">12</div>
+                    <div class="text-xs text-gray-500 mt-1">5 urgent</div>
+                </div>
+                <div class="card p-4 animate-fade">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-400 text-xs">High-Risk Projects</span>
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-red-400"></i>
+                    </div>
+                    <div class="metric-value text-2xl text-red-400">4</div>
+                    <div class="text-xs text-gray-500 mt-1">2 critical</div>
+                </div>
+                <div class="card p-4 animate-fade">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-400 text-xs">Delayed Milestones</span>
+                        <i data-lucide="clock-alert" class="w-4 h-4 text-yellow-400"></i>
+                    </div>
+                    <div class="metric-value text-2xl text-yellow-400">7</div>
+                    <div class="text-xs text-gray-500 mt-1">3 this week</div>
+                </div>
+                <div class="card p-4 animate-fade">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-400 text-xs">AI Drafts</span>
+                        <i data-lucide="sparkles" class="w-4 h-4 text-brand"></i>
+                    </div>
+                    <div class="metric-value text-2xl text-brand-light">18</div>
+                    <div class="text-xs text-gray-500 mt-1">Awaiting review</div>
+                </div>
+                <div class="card p-4 animate-fade">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-gray-400 text-xs">Vendor Delays</span>
+                        <i data-lucide="truck" class="w-4 h-4 text-gray-500"></i>
+                    </div>
+                    <div class="metric-value text-2xl text-yellow-400">5</div>
+                    <div class="text-xs text-gray-500 mt-1">2 critical</div>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="grid grid-cols-3 gap-6 mb-6">
+                <!-- Active Projects Table -->
+                <div class="col-span-2 card p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold">Active Projects</h3>
+                        <button class="text-sm text-brand hover:text-brand-light">View All →</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left text-gray-500 border-b border-dark-700">
+                                    <th class="pb-3 font-medium">Project</th>
+                                    <th class="pb-3 font-medium">Customer</th>
+                                    <th class="pb-3 font-medium">Status</th>
+                                    <th class="pb-3 font-medium">Risk</th>
+                                    <th class="pb-3 font-medium">Next Milestone</th>
+                                    <th class="pb-3 font-medium">AI Conf.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projectTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- AI Insights Panel -->
+                <div class="card p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold">AI Operational Insights</h3>
+                        <span class="status-dot status-green"></span>
+                    </div>
+                    <div class="space-y-3" id="aiInsights">
+                        <div class="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                            <div class="flex items-start gap-2">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 text-red-400 mt-0.5"></i>
+                                <div>
+                                    <div class="text-sm font-medium text-red-400">Permit Delay Risk</div>
+                                    <div class="text-xs text-gray-400 mt-1">FiberNode Phase 3 - City permit review extended by 2 weeks</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                            <div class="flex items-start gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-yellow-400 mt-0.5"></i>
+                                <div>
+                                    <div class="text-sm font-medium text-yellow-400">Vendor Response Needed</div>
+                                    <div class="text-xs text-gray-400 mt-1">NetGear Solutions - 3 days pending quote for network switches</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-brand/10 border border-brand/20">
+                            <div class="flex items-start gap-2">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-brand mt-0.5"></i>
+                                <div>
+                                    <div class="text-sm font-medium text-brand-light">AI Recommendation</div>
+                                    <div class="text-xs text-gray-400 mt-1">Reassign Field Tech #042 to Site Alpha - current workload 40% below capacity</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Approval Queue & Timeline -->
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <!-- Approval Queue -->
+                <div class="card p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold">AI Approval Queue</h3>
+                        <span class="text-xs text-gray-500">12 pending</span>
+                    </div>
+                    <div class="space-y-3" id="approvalQueue">
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-dark-800 border border-dark-700">
+                            <div class="w-8 h-8 rounded bg-brand/20 flex items-center justify-center"><i data-lucide="message-square" class="w-4 h-4 text-brand"></i></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-medium">Draft Slack - Vendor Escalation</div>
+                                <div class="text-xs text-gray-500">NetGear Solutions - Quote follow-up</div>
+                            </div>
+                            <div class="flex gap-1">
+                                <button class="p-1.5 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                <button class="p-1.5 rounded bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                <button class="p-1.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-dark-800 border border-dark-700">
+                            <div class="w-8 h-8 rounded bg-blue-500/20 flex items-center justify-center"><i data-lucide="mail" class="w-4 h-4 text-blue-400"></i></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-medium">Draft Email - Permit Update</div>
+                                <div class="text-xs text-gray-500">City of Portland - Phase 2 approval request</div>
+                            </div>
+                            <div class="flex gap-1">
+                                <button class="p-1.5 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                <button class="p-1.5 rounded bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                <button class="p-1.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-dark-800 border border-dark-700">
+                            <div class="w-8 h-8 rounded bg-purple-500/20 flex items-center justify-center"><i data-lucide="calendar" class="w-4 h-4 text-purple-400"></i></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-medium">Timeline Adjustment</div>
+                                <div class="text-xs text-gray-500">Site Beta - Add 2-week buffer for equipment delivery</div>
+                            </div>
+                            <div class="flex gap-1">
+                                <button class="p-1.5 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30"><i data-lucide="check" class="w-4 h-4"></i></button>
+                                <button class="p-1.5 rounded bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                <button class="p-1.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Timeline -->
+                <div class="card p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold">Timeline & Milestones</h3>
+                        <button class="text-sm text-brand hover:text-brand-light">Full View →</button>
+                    </div>
+                    <div class="space-y-4" id="timelineView">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-medium">FiberNode Phase 3</span>
+                                <span class="text-xs text-gray-500">Dec 15</span>
+                            </div>
+                            <div class="confidence-bar"><div class="confidence-fill bg-brand" style="width: 65%"></div></div>
+                            <div class="flex justify-between text-xs mt-1">
+                                <span class="text-gray-500">Milestone: Site Survey</span>
+                                <span class="text-brand">65%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-medium">MetroLink Expansion</span>
+                                <span class="text-xs text-red-400">OVERDUE</span>
+                            </div>
+                            <div class="confidence-bar"><div class="confidence-fill bg-red-500" style="width: 100%"></div></div>
+                            <div class="flex justify-between text-xs mt-1">
+                                <span class="text-gray-500">Milestone: Equipment Install</span>
+                                <span class="text-red-400">Delayed 3 days</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-medium">5G Small Cell Deploy</span>
+                                <span class="text-xs text-gray-500">Dec 20</span>
+                            </div>
+                            <div class="confidence-bar"><div class="confidence-fill bg-green-500" style="width: 40%"></div></div>
+                            <div class="flex justify-between text-xs mt-1">
+                                <span class="text-gray-500">Milestone: Permits</span>
+                                <span class="text-green-400">On Track</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Feed -->
+            <div class="card p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold">Unified Activity Feed</h3>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1 text-xs rounded-full bg-brand/20 text-brand">All</button>
+                        <button class="px-3 py-1 text-xs rounded-full bg-dark-700 text-gray-400 hover:bg-dark-600">Slack</button>
+                        <button class="px-3 py-1 text-xs rounded-full bg-dark-700 text-gray-400 hover:bg-dark-600">Email</button>
+                        <button class="px-3 py-1 text-xs rounded-full bg-dark-700 text-gray-400 hover:bg-dark-600">Meetings</button>
+                    </div>
+                </div>
+                <div class="space-y-3" id="activityFeed">
+                    <div class="flex items-start gap-3 p-3 rounded-lg bg-dark-800 border border-dark-700">
+                        <div class="w-8 h-8 rounded bg-blue-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="message-square" class="w-4 h-4 text-blue-400"></i></div>
+                        <div class="flex-1">
+                            <div class="text-sm"><span class="font-medium">Slack:</span> <span class="text-gray-300">New message in #fibernode-phase3 - "Permit approval expected by EOD Friday"</span></div>
+                            <div class="text-xs text-gray-500 mt-1">2 minutes ago in #fibernode-phase3</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 rounded-lg bg-dark-800 border border-dark-700">
+                        <div class="w-8 h-8 rounded bg-green-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="mail" class="w-4 h-4 text-green-400"></i></div>
+                        <div class="flex-1">
+                            <div class="text-sm"><span class="font-medium">Email:</span> <span class="text-gray-300">Vendor quote received from NetGear Solutions - $45,200 for network switches</span></div>
+                            <div class="text-xs text-gray-500 mt-1">15 minutes ago</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 rounded-lg bg-dark-800 border border-dark-700">
+                        <div class="w-8 h-8 rounded bg-purple-500/20 flex items-center justify-center flex-shrink-0"><i data-lucide="video" class="w-4 h-4 text-purple-400"></i></div>
+                        <div class="flex-1">
+                            <div class="text-sm"><span class="font-medium">Meeting:</span> <span class="text-gray-300">Weekly status sync - Phase 3 kickoff notes generated</span></div>
+                            <div class="text-xs text-gray-500 mt-1">1 hour ago - 45 min</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 rounded-lg bg-dark-800 border border-dark-700">
+                        <div class="w-8 h-8 rounded bg-brand/20 flex items-center justify-center flex-shrink-0"><i data-lucide="sparkles" class="w-4 h-4 text-brand"></i></div>
+                        <div class="flex-1">
+                            <div class="text-sm"><span class="font-medium">AI Action:</span> <span class="text-gray-300">Generated follow-up email draft for delayed vendor response</span></div>
+                            <div class="text-xs text-gray-500 mt-1">2 hours ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects Page -->
+        <div class="p-6 hidden" id="page-projects">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold">Active Projects</h2>
+                    <p class="text-gray-500 text-sm mt-1">28 active infrastructure deployments</p>
+                </div>
+                <button class="px-4 py-2 bg-brand hover:bg-brand-dark rounded-lg text-sm font-medium flex items-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i> New Project
+                </button>
+            </div>
+            <div class="card overflow-hidden">
+                <div class="p-4 border-b border-dark-700 flex gap-4">
+                    <input type="text" placeholder="Search projects..." class="bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-sm flex-1">
+                    <select class="bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-sm">
+                        <option>All Status</option>
+                        <option>On Track</option>
+                        <option>At Risk</option>
+                        <option>Delayed</option>
+                    </select>
+                    <select class="bg-dark-800 border border-dark-600 rounded-lg px-4 py-2 text-sm">
+                        <option>All Risk Levels</option>
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                    </select>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-dark-800">
+                            <tr class="text-left text-gray-400">
+                                <th class="p-4 font-medium">Project</th>
+                                <th class="p-4 font-medium">Customer</th>
+                                <th class="p-4 font-medium">Status</th>
+                                <th class="p-4 font-medium">Risk</th>
+                                <th class="p-4 font-medium">PM Owner</th>
+                                <th class="p-4 font-medium">Last Activity</th>
+                                <th class="p-4 font-medium">AI Conf.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Queue Page -->
+        <div class="p-6 hidden" id="page-queue">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold">AI Review Queue</h2>
+                <p class="text-gray-500 text-sm mt-1">18 AI-generated items awaiting human review</p>
+            </div>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="card p-5">
+                    <h3 class="font-semibold mb-4">Draft Communications</h3>
+                    <div class="space-y-3">
+                        <div class="p-4 rounded-lg bg-dark-800 border border-dark-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium">Slack - Customer Update</span>
+                                <span class="text-xs text-gray-500">Confidence: 94%</span>
+                            </div>
+                            <p class="text-sm text-gray-400 mb-3">"Hi team, wanted to provide a quick update on the FiberNode deployment..."</p>
+                            <div class="flex gap-2">
+                                <button class="px-3 py-1.5 bg-green-500/20 text-green-400 rounded text-sm hover:bg-green-500/30">Approve</button>
+                                <button class="px-3 py-1.5 bg-dark-600 text-gray-300 rounded text-sm hover:bg-dark-500">Edit</button>
+                                <button class="px-3 py-1.5 bg-red-500/20 text-red-400 rounded text-sm hover:bg-red-500/30">Reject</button>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-lg bg-dark-800 border border-dark-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium">Email - Vendor Escalation</span>
+                                <span class="text-xs text-gray-500">Confidence: 87%</span>
+                            </div>
+                            <p class="text-sm text-gray-400 mb-3">"Dear Vendor Partner, We are writing to follow up on the outstanding quote..."</p>
+                            <div class="flex gap-2">
+                                <button class="px-3 py-1.5 bg-green-500/20 text-green-400 rounded text-sm hover:bg-green-500/30">Approve</button>
+                                <button class="px-3 py-1.5 bg-dark-600 text-gray-300 rounded text-sm hover:bg-dark-500">Edit</button>
+                                <button class="px-3 py-1.5 bg-red-500/20 text-red-400 rounded text-sm hover:bg-red-500/30">Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-semibold mb-4">Timeline Recommendations</h3>
+                    <div class="space-y-3">
+                        <div class="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-yellow-400"></i>
+                                <span class="text-sm font-medium text-yellow-400">Schedule Adjustment</span>
+                            </div>
+                            <p class="text-sm text-gray-400 mb-3">MetroLink Expansion is 3 days behind schedule. AI recommends adding 5-day buffer to equipment installation milestone.</p>
+                            <div class="flex gap-2">
+                                <button class="px-3 py-1.5 bg-green-500/20 text-green-400 rounded text-sm hover:bg-green-500/30">Accept</button>
+                                <button class="px-3 py-1.5 bg-red-500/20 text-red-400 rounded text-sm hover:bg-red-500/30">Dismiss</button>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-lg bg-brand/10 border border-brand/20">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i data-lucide="users" class="w-4 h-4 text-brand"></i>
+                                <span class="text-sm font-medium text-brand-light">Resource Reassignment</span>
+                            </div>
+                            <p class="text-sm text-gray-400 mb-3">Field Tech #042 is underutilized. AI suggests reassigning to Site Alpha to accelerate 5G deployment.</p>
+                            <div class="flex gap-2">
+                                <button class="px-3 py-1.5 bg-green-500/20 text-green-400 rounded text-sm hover:bg-green-500/30">Approve</button>
+                                <button class="px-3 py-1.5 bg-red-500/20 text-red-400 rounded text-sm hover:bg-red-500/30">Dismiss</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Project Data
+        const projects = [
+            { name: 'FiberNode Phase 3', customer: 'City of Portland', status: 'On Track', risk: 'Low', milestone: 'Site Survey', owner: 'Kate P.', lastActivity: '2h ago', aiConf: 92 },
+            { name: 'MetroLink Expansion', customer: 'Metro Transit', status: 'Delayed', risk: 'High', milestone: 'Equipment Install', owner: 'James M.', lastActivity: '15m ago', aiConf: 78 },
+            { name: '5G Small Cell Deploy', customer: 'Verizon Wireless', status: 'On Track', risk: 'Low', milestone: 'Permits', owner: 'Sarah L.', lastActivity: '1h ago', aiConf: 95 },
+            { name: 'Site Alpha Upgrade', customer: 'Enterprise Corp', status: 'At Risk', risk: 'Medium', milestone: 'Fiber Pull', owner: 'Mike R.', lastActivity: '30m ago', aiConf: 84 },
+            { name: 'Backbone Ring Build', customer: 'Regional ISP', status: 'On Track', risk: 'Low', milestone: 'Splice Testing', owner: 'Kate P.', lastActivity: '3h ago', aiConf: 91 },
+        ];
+
+        // Render Project Table
+        function renderProjects() {
+            const tbody = document.getElementById('projectTable');
+            tbody.innerHTML = projects.map(p => `
+                <tr class="border-b border-dark-700 hover:bg-dark-800/50">
+                    <td class="py-3 font-medium">${p.name}</td>
+                    <td class="py-3 text-gray-400">${p.customer}</td>
+                    <td class="py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ${p.status === 'On Track' ? 'bg-green-500/20 text-green-400' : p.status === 'Delayed' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}">${p.status}</span></td>
+                    <td class="py-3"><span class="${p.risk === 'High' ? 'text-red-400' : p.risk === 'Medium' ? 'text-yellow-400' : 'text-green-400'}">${p.risk}</span></td>
+                    <td class="py-3 text-gray-400 text-xs">${p.milestone}</td>
+                    <td class="py-3">
+                        <div class="flex items-center gap-2">
+                            <div class="confidence-bar w-16"><div class="confidence-fill ${p.aiConf >= 90 ? 'bg-green-500' : p.aiConf >= 80 ? 'bg-brand' : 'bg-yellow-500'}" style="width: ${p.aiConf}%"></div>
+                            <span class="text-xs text-gray-500">${p.aiConf}%</span>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Full Projects Table
+        function renderFullProjects() {
+            const tbody = document.getElementById('projectsTableBody');
+            tbody.innerHTML = projects.map(p => `
+                <tr class="border-b border-dark-700 hover:bg-dark-800/50">
+                    <td class="p-4 font-medium">${p.name}</td>
+                    <td class="p-4 text-gray-400">${p.customer}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${p.status === 'On Track' ? 'bg-green-500/20 text-green-400' : p.status === 'Delayed' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}">${p.status}</span></td>
+                    <td class="p-4"><span class="${p.risk === 'High' ? 'text-red-400' : p.risk === 'Medium' ? 'text-yellow-400' : 'text-green-400'}">${p.risk}</span></td>
+                    <td class="p-4 text-gray-400">${p.owner}</td>
+                    <td class="p-4 text-gray-500">${p.lastActivity}</td>
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <div class="confidence-bar w-16"><div class="confidence-fill ${p.aiConf >= 90 ? 'bg-green-500' : p.aiConf >= 80 ? 'bg-brand' : 'bg-yellow-500'}" style="width: ${p.aiConf}%"></div>
+                            <span class="text-xs text-gray-500">${p.aiConf}%</span>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const page = item.dataset.page;
+                document.getElementById('page-dashboard').classList.add('hidden');
+                document.getElementById('page-projects').classList.add('hidden');
+                document.getElementById('page-queue').classList.add('hidden');
+                document.getElementById('page-' + page).classList.remove('hidden');
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProjects();
+            renderFullProjects();
+        });
+
+        // Simulate live updates
+        setInterval(() => {
+            const activities = [
+                { icon: 'message-square', text: 'New Slack message in #project-alpha' },
+                { icon: 'mail', text: 'Email received from vendor' },
+                { icon: 'calendar', text: 'Meeting reminder: Weekly sync in 30m' },
+            ];
+            const item = activities[Math.floor(Math.random() * activities.length)];
+            console.log('New activity:', item.text);
+        }, 15000);
+    </script>
+</body>
+</html>
