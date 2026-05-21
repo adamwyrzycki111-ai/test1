@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - StayHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div id="sidebar"></div>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Admin Dashboard</h1>
+                <p class="page-subtitle">Manage platform operations and monitor activity</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid mb-xl">
+                <div class="widget-card">
+                    <div class="widget-card-icon primary">🏠</div>
+                    <div class="widget-card-value">156</div>
+                    <div class="widget-card-label">Total Properties</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon success">✅</div>
+                    <div class="widget-card-value">1,234</div>
+                    <div class="widget-card-label">Total Bookings</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon warning">📋</div>
+                    <div class="widget-card-value">23</div>
+                    <div class="widget-card-label">Pending Requests</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon primary">💰</div>
+                    <div class="widget-card-value">$89k</div>
+                    <div class="widget-card-label">Monthly Revenue</div>
+                </div>
+            </div>
+
+            <!-- Activity & Moderation -->
+            <div class="grid-2 mb-xl">
+                <div>
+                    <h3 class="mb-lg">Recent Platform Activity</h3>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr><th>Action</th><th>User</th><th>Time</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>New property listed</td><td>Sarah M.</td><td>2 hrs ago</td></tr>
+                                <tr><td>Booking confirmed</td><td>James W.</td><td>4 hrs ago</td></tr>
+                                <tr><td>Review submitted</td><td>Guest</td><td>5 hrs ago</td></tr>
+                                <tr><td>Payment received</td><td>System</td><td>6 hrs ago</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="mb-lg">Content Moderation</h3>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr><th>Type</th><th>Content</th><th>Action</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Review</td>
+                                    <td>Great place!</td>
+                                    <td><span class="badge badge-success">Approved</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Photo</td>
+                                    <td>property_5.jpg</td>
+                                    <td><span class="badge badge-warning">Review</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Listing</td>
+                                    <td>Ocean View Villa</td>
+                                    <td><span class="badge badge-success">Approved</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Owner Management -->
+            <h3 class="mb-lg">Property Owners</h3>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr><th>Owner</th><th>Properties</th><th>Rating</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Sarah Mitchell</td><td>12</td><td>⭐ 4.9</td><td><span class="badge badge-success">Active</span></td><td><button class="btn btn-sm btn-ghost">View</button></td></tr>
+                        <tr><td>James Wilson</td><td>8</td><td>⭐ 4.7</td><td><span class="badge badge-success">Active</span></td><td><button class="btn btn-sm btn-ghost">View</button></td></tr>
+                        <tr><td>Maria Garcia</td><td>15</td><td>⭐ 4.8</td><td><span class="badge badge-success">Active</span></td><td><button class="btn btn-sm btn-ghost">View</button></td></tr>
+                        <tr><td>David Chen</td><td>6</td><td>⭐ 4.6</td><td><span class="badge badge-warning">Review</span></td><td><button class="btn btn-sm btn-ghost">View</button></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

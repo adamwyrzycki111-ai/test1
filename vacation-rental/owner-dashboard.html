@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard - StayHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div id="sidebar"></div>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header flex justify-between items-center">
+                <div>
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Welcome back! Here's your property overview.</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('addPropertyModal')">+ Add Property</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid mb-xl">
+                <div class="widget-card">
+                    <div class="widget-card-icon primary">🏠</div>
+                    <div class="widget-card-value" id="totalProperties">8</div>
+                    <div class="widget-card-label">Total Properties</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon warning">📋</div>
+                    <div class="widget-card-value" id="pendingRequests">3</div>
+                    <div class="widget-card-label">Pending Requests</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon success">📈</div>
+                    <div class="widget-card-value" id="occupancyRate">78%</div>
+                    <div class="widget-card-label">Occupancy Rate</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon primary">💰</div>
+                    <div class="widget-card-value">$12.4k</div>
+                    <div class="widget-card-label">This Month</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid-3 mb-xl">
+                <a href="stay-requests.html" class="card flex items-center gap-md">
+                    <div style="font-size: 2rem;">📋</div>
+                    <div>
+                        <h4>Stay Requests</h4>
+                        <p class="text-sm text-muted">3 pending approvals</p>
+                    </div>
+                </a>
+                <a href="tasks.html" class="card flex items-center gap-md">
+                    <div style="font-size: 2rem;">✅</div>
+                    <div>
+                        <h4>Tasks</h4>
+                        <p class="text-sm text-muted">4 pending tasks</p>
+                    </div>
+                </a>
+                <a href="calendar.html" class="card flex items-center gap-md">
+                    <div style="font-size: 2rem;">📅</div>
+                    <div>
+                        <h4>Calendar</h4>
+                        <p class="text-sm text-muted">View availability</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Recent Activity -->
+            <h3 class="mb-lg">Recent Bookings</h3>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Guest</th>
+                            <th>Dates</th>
+                            <th>Revenue</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Seaside Villa</td>
+                            <td>Johnson Family</td>
+                            <td>May 1-7</td>
+                            <td>$3,150</td>
+                            <td><span class="badge badge-success">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>Mountain Cabin</td>
+                            <td>Williams Party</td>
+                            <td>May 10-14</td>
+                            <td>$1,540</td>
+                            <td><span class="badge badge-success">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>Lake House</td>
+                            <td>Thompson Group</td>
+                            <td>May 20-25</td>
+                            <td>$1,600</td>
+                            <td><span class="badge badge-primary">Upcoming</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Property Modal -->
+    <div class="modal-overlay" id="addPropertyModal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Property</h3>
+                <button class="modal-close" onclick="closeModal('addPropertyModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Property Name</label>
+                    <input type="text" class="form-input" placeholder="Enter property name">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Location</label>
+                        <input type="text" class="form-input" placeholder="City, State">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nightly Rate ($)</label>
+                        <input type="number" class="form-input" placeholder="250">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Bedrooms</label>
+                        <select class="form-input">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5+</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bathrooms</label>
+                        <select class="form-input">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4+</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Max Guests</label>
+                    <input type="number" class="form-input" placeholder="4">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" placeholder="Describe your property..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">House Rules</label>
+                    <textarea class="form-textarea" placeholder="Enter house rules..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addPropertyModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="addProperty()">Add Property</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+    <script>
+        function addProperty() {
+            alert('Property added successfully!');
+            closeModal('addPropertyModal');
+        }
+
+        // Initialize stats
+        renderStats();
+    </script>
+</body>
+</html>

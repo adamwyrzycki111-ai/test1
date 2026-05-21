@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Finance Ops</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        dark: {
+                            900: '#0a0a0f',
+                            800: '#12121a',
+                            700: '#1a1a24',
+                            600: '#24242f',
+                            500: '#2e2e3a',
+                        },
+                        accent: {
+                            blue: '#3b82f6',
+                            green: '#10b981',
+                            red: '#ef4444',
+                            yellow: '#f59e0b',
+                            purple: '#8b5cf6',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #12121a 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+
+        .glass-card {
+            background: rgba(26, 26, 36, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+        }
+
+        .glow-green { box-shadow: 0 0 30px rgba(16, 185, 129, 0.15); }
+        .glow-blue { box-shadow: 0 0 30px rgba(59, 130, 246, 0.15); }
+        .glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+
+        .metric-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+
+        .trend-up { color: #10b981; }
+        .trend-down { color: #ef4444; }
+
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .flow-node {
+            position: relative;
+        }
+
+        .flow-arrow {
+            position: relative;
+        }
+
+        .flow-arrow::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #3b82f6;
+            font-size: 20px;
+        }
+
+        .flow-arrow:last-child::after {
+            display: none;
+        }
+
+        .table-row-hover:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #2e2e3a;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #10b981;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            left: 23px;
+        }
+
+        .activity-item {
+            border-left: 2px solid #2e2e3a;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #3b82f6;
+            border-radius: 50%;
+            left: -5px;
+            top: 6px;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-slide {
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        .chart-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawLine 2s ease forwards;
+        }
+
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-processing {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a24;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-card border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-accent-blue flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-bold">Autonomous Finance Ops</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <!-- Entity Switcher -->
+                    <div class="relative">
+                        <button class="glass-card px-4 py-2 flex items-center gap-2 hover:bg-white/5 transition" onclick="toggleEntityDropdown()">
+                            <span id="selectedEntity">Entity A</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div id="entityDropdown" class="hidden absolute top-full mt-2 right-0 glass-card py-2 min-w-[160px]">
+                            <button onclick="selectEntity('Entity A')" class="block w-full text-left px-4 py-2 hover:bg-white/5">Entity A</button>
+                            <button onclick="selectEntity('Entity B')" class="block w-full text-left px-4 py-2 hover:bg-white/5">Entity B</button>
+                            <button onclick="selectEntity('Entity C')" class="block w-full text-left px-4 py-2 hover:bg-white/5">Entity C</button>
+                            <button onclick="selectEntity('All Entities')" class="block w-full text-left px-4 py-2 hover:bg-white/5 font-semibold">All Entities</button>
+                        </div>
+                    </div>
+
+                    <!-- Date Range -->
+                    <button class="glass-card px-4 py-2 flex items-center gap-2 hover:bg-white/5 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span>Last 30 Days</span>
+                    </button>
+
+                    <!-- Sync Status -->
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-accent-green pulse-dot"></span>
+                        <span class="text-sm text-gray-400">Live</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-8 px-6 max-w-7xl mx-auto">
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-6 gap-4 mb-6">
+            <!-- Total Cash Balance -->
+            <div class="glass-card p-5 glow-blue animate-slide" style="animation-delay: 0.05s">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-gray-400 text-sm">Total Cash Balance</span>
+                    <span class="text-2xl">💰</span>
+                </div>
+                <div class="metric-value text-2xl text-white mb-1">$2.4M</div>
+                <div class="flex items-center gap-1 text-sm">
+                    <span class="trend-up">↑ 12.4%</span>
+                    <span class="text-gray-500">vs last month</span>
+                </div>
+            </div>
+
+            <!-- Daily Net Cash Flow -->
+            <div class="glass-card p-5 animate-slide" style="animation-delay: 0.1s">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-gray-400 text-sm">Daily Net Flow</span>
+                    <span class="text-2xl">📊</span>
+                </div>
+                <div class="metric-value text-2xl text-accent-green mb-1">+$18,420</div>
+                <div class="flex items-center gap-1 text-sm">
+                    <span class="trend-up">↑ 8.2%</span>
+                    <span class="text-gray-500">vs yesterday</span>
+                </div>
+            </div>
+
+            <!-- AP Pending -->
+            <div class="glass-card p-5 animate-slide" style="animation-delay: 0.15s">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-gray-400 text-sm">AP Pending</span>
+                    <span class="text-2xl">📄</span>
+                </div>
+                <div class="metric-value text-2xl text-white mb-1">$342,890</div>
+                <div class="flex items-center gap-1 text-sm">
+                    <span class="text-gray-500">23 invoices</span>
+                </div>
+            </div>
+
+            <!-- AR Outstanding -->
+            <div class="glass-card p-5 glow-green animate-slide" style="animation-delay: 0.2s">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-gray-400 text-sm">AR Outstanding</span>
+                    <span class="text-2xl">📑</span>
+                </div>
+                <div class="metric-value text-2xl text-accent-green mb-1">$487,250</div>
+                <div class="flex items-center gap-1 text-sm">
+                    <span class="trend-up">↑ 15 invoices</span>
+                    <span class="text-gray-500">collected</span>
+                </div>
+            </div>
+
+            <!-- Payroll Liabilities -->
+            <div class="glass-card p-5 animate-slide" style="animation-delay: 0.25s">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-gray-400 text-sm">Payroll Due</span>
+                    <span class="text-2xl">👥</span>
+                </div>
+                <div class="metric-value text-2xl text-white mb-1">$89,450</div>
+                <div class="flex items-center gap-1 text-sm">
+                    <span class="text-accent-yellow">⚠️</span>
+                    <span class="text-gray-500">Due in 2 days</span>
+                </div>
+            </div>
+
+            <!-- 30-Day Forecast -->
+            <div class="glass-card p-5 glow-blue animate-slide" style="animation-delay: 0.3s">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-gray-400 text-sm">30-Day Forecast</span>
+                    <span class="text-2xl">🔮</span>
+                </div>
+                <div class="metric-value text-2xl text-white mb-1">$2.18M</div>
+                <div class="flex items-center gap-1 text-sm">
+                    <span class="trend-down">↓ 9.2%</span>
+                    <span class="text-gray-500">projected</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Flow Visualization -->
+        <div class="glass-card p-6 mb-6 animate-slide" style="animation-delay: 0.35s">
+            <h2 class="text-lg font-semibold mb-6">Automation Pipeline</h2>
+            
+            <div class="flex items-center justify-between gap-4">
+                <!-- Bank Feeds -->
+                <div class="flow-node flex-1">
+                    <div class="glass-card p-4 border-l-4 border-l-accent-blue">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-semibold">Bank Feeds</span>
+                            <span class="status-active px-2 py-1 rounded text-xs">Active</span>
+                        </div>
+                        <div class="text-2xl font-mono text-accent-blue">1,247</div>
+                        <div class="text-xs text-gray-500">transactions/min</div>
+                    </div>
+                </div>
+
+                <!-- Normalization -->
+                <div class="flow-arrow flex-1">
+                    <div class="glass-card p-4 border-l-4 border-l-purple">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-semibold">Normalization</span>
+                            <span class="status-active px-2 py-1 rounded text-xs">Active</span>
+                        </div>
+                        <div class="text-2xl font-mono text-purple-400">94%</div>
+                        <div class="text-xs text-gray-500">auto-categorized</div>
+                    </div>
+                </div>
+
+                <!-- Rules Engine -->
+                <div class="flow-arrow flex-1">
+                    <div class="glass-card p-4 border-l-4 border-l-accent-green">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-semibold">Rules Engine</span>
+                            <span class="status-active px-2 py-1 rounded text-xs">Active</span>
+                        </div>
+                        <div class="text-2xl font-mono text-accent-green">847</div>
+                        <div class="text-xs text-gray-500">rules executed/min</div>
+                    </div>
+                </div>
+
+                <!-- QBO Posting -->
+                <div class="flow-arrow flex-1">
+                    <div class="glass-card p-4 border-l-4 border-l-accent-yellow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-semibold">QBO Posting</span>
+                            <span class="status-processing px-2 py-1 rounded text-xs">Processing</span>
+                        </div>
+                        <div class="text-2xl font-mono text-accent-yellow">89ms</div>
+                        <div class="text-xs text-gray-500">avg latency</div>
+                    </div>
+                </div>
+
+                <!-- Reporting -->
+                <div class="flex-1">
+                    <div class="glass-card p-4 border-l-4 border-l-pink">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-semibold">Reporting</span>
+                            <span class="status-active px-2 py-1 rounded text-xs">Active</span>
+                        </div>
+                        <div class="text-2xl font-mono text-pink-400">Real-time</div>
+                        <div class="text-xs text-gray-500">dashboards synced</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-3 gap-6">
+            <!-- Multi-Entity Table -->
+            <div class="col-span-2 glass-card p-6 animate-slide" style="animation-delay: 0.4s">
+                <h2 class="text-lg font-semibold mb-4">Multi-Entity Cash View</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-400 text-sm border-b border-white/10">
+                                <th class="pb-3 font-medium">Entity</th>
+                                <th class="pb-3 font-medium text-right">Cash Balance</th>
+                                <th class="pb-3 font-medium text-right">AP</th>
+                                <th class="pb-3 font-medium text-right">AR</th>
+                                <th class="pb-3 font-medium text-right">Net Position</th>
+                                <th class="pb-3 font-medium text-center">Risk</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entityTable">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Activity Feed -->
+            <div class="glass-card p-6 animate-slide" style="animation-delay: 0.45s">
+                <h2 class="text-lg font-semibold mb-4">Live Activity</h2>
+                <div class="space-y-4 max-h-[320px] overflow-y-auto" id="activityFeed">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules Engine -->
+        <div class="glass-card p-6 mt-6 animate-slide" style="animation-delay: 0.5s">
+            <h2 class="text-lg font-semibold mb-4">Automation Rules Engine</h2>
+            <div class="grid grid-cols-3 gap-4" id="rulesPanel">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <!-- Cash Flow Forecast -->
+        <div class="glass-card p-6 mt-6 animate-slide" style="animation-delay: 0.55s">
+            <h2 class="text-lg font-semibold mb-4">30-Day Cash Flow Forecast</h2>
+            <div class="relative h-64">
+                <svg class="w-full h-full" viewBox="0 0 800 250" preserveAspectRatio="none">
+                    <!-- Grid lines -->
+                    <defs>
+                        <linearGradient id="forecastGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+                            <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0" />
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- Grid -->
+                    <line x1="50" y1="50" x2="750" y2="50" stroke="#1a1a24" stroke-width="1"/>
+                    <line x1="50" y1="100" x2="750" y2="100" stroke="#1a1a24" stroke-width="1"/>
+                    <line x1="50" y1="150" x2="750" y2="150" stroke="#1a1a24" stroke-width="1"/>
+                    <line x1="50" y1="200" x2="750" y2="200" stroke="#1a1a24" stroke-width="1"/>
+                    
+                    <!-- Forecast area -->
+                    <path d="M50,120 L150,115 L250,100 L350,95 L450,85 L550,90 L650,75 L750,60 L750,200 L50,200 Z" fill="url(#forecastGradient)"/>
+                    
+                    <!-- Forecast line -->
+                    <path class="chart-line" d="M50,120 L150,115 L250,100 L350,95 L450,85 L550,90 L650,75 L750,60" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+                    
+                    <!-- Actual line -->
+                    <path d="M50,125 L150,118 L250,105 L350,98" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="5,5" stroke-linecap="round"/>
+                    
+                    <!-- Data points -->
+                    <circle cx="50" cy="120" r="4" fill="#3b82f6"/>
+                    <circle cx="150" cy="115" r="4" fill="#3b82f6"/>
+                    <circle cx="250" cy="100" r="4" fill="#3b82f6"/>
+                    <circle cx="350" cy="95" r="4" fill="#3b82f6"/>
+                    <circle cx="450" cy="85" r="4" fill="#3b82f6"/>
+                    <circle cx="550" cy="90" r="4" fill="#3b82f6"/>
+                    <circle cx="650" cy="75" r="4" fill="#3b82f6"/>
+                    <circle cx="750" cy="60" r="4" fill="#3b82f6"/>
+                    
+                    <!-- Legend -->
+                    <line x1="60" y1="220" x2="90" y2="220" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="100" y="224" fill="#94a3b8" font-size="10">Forecast</text>
+                    
+                    <line x1="180" y1="220" x2="210" y2="220" stroke="#10b981" stroke-width="2" stroke-dasharray="5,5"/>
+                    <text x="220" y="224" fill="#94a3b8" font-size="10">Actual</text>
+                </svg>
+                
+                <!-- Y-axis labels -->
+                <div class="absolute left-0 top-0 h-full flex flex-col justify-between py-2 text-xs text-gray-500">
+                    <span>$2.6M</span>
+                    <span>$2.4M</span>
+                    <span>$2.2M</span>
+                    <span>$2.0M</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ========================
+        // MOCK DATA
+        // ========================
+
+        const entities = [
+            { name: 'Entity A (Operating)', cash: 1245000, ap: 145000, ar: 234000, net: 1334000, risk: 'green' },
+            { name: 'Entity B (Holding)', cash: 890000, ap: 23000, ar: 0, net: 867000, risk: 'green' },
+            { name: 'Entity C (Real Estate)', cash: 156000, ap: 174890, ar: 253250, net: 234360, risk: 'yellow' },
+            { name: 'Entity D (Payroll)', cash: 89450, ap: 0, ar: 0, net: 89450, risk: 'green' },
+        ];
+
+        const activities = [
+            { time: '2 min ago', icon: '📝', text: 'Journal posted to QBO for Entity B', type: 'success' },
+            { time: '5 min ago', icon: '🏷️', text: 'Invoice auto-coded: Vendor ABC', type: 'info' },
+            { time: '8 min ago', icon: '🏦', text: 'Bank feed synced: Chase Business', type: 'success' },
+            { time: '12 min ago', icon: '👥', text: 'Payroll accrual posted', type: 'success' },
+            { time: '18 min ago', icon: '📊', text: 'AR aging report generated', type: 'info' },
+            { time: '25 min ago', icon: '⚙️', text: 'Rule triggered: Transfer threshold', type: 'warning' },
+            { time: '32 min ago', icon: '✅', text: 'Vendor payment approved', type: 'success' },
+            { time: '45 min ago', icon: '🔄', text: 'Multi-entity reconciliation complete', type: 'success' },
+        ];
+
+        const rules = [
+            { id: 1, name: 'Payroll Accrual', condition: 'If payroll date - 2 days', action: 'Auto-accrue wages', status: 'active', lastTriggered: '2 hours ago' },
+            { id: 2, name: 'Cash Threshold', condition: 'If cash < $50k', action: 'Trigger transfer', status: 'active', lastTriggered: '1 day ago' },
+            { id: 3, name: 'Invoice Auto-Code', condition: 'If invoice received', action: 'Auto-code + route', status: 'active', lastTriggered: '5 min ago' },
+        ];
+
+        // ========================
+        // RENDER FUNCTIONS
+        // ========================
+
+        function renderEntities() {
+            const tbody = document.getElementById('entityTable');
+            tbody.innerHTML = entities.map(e => `
+                <tr class="table-row-hover border-b border-white/5">
+                    <td class="py-3 font-medium">${e.name}</td>
+                    <td class="py-3 text-right metric-value">$${e.cash.toLocaleString()}</td>
+                    <td class="py-3 text-right metric-value text-accent-red">$${e.ap.toLocaleString()}</td>
+                    <td class="py-3 text-right metric-value text-accent-green">$${e.ar.toLocaleString()}</td>
+                    <td class="py-3 text-right metric-value ${e.net > 0 ? 'text-white' : 'text-accent-red'}">$${e.net.toLocaleString()}</td>
+                    <td class="py-3 text-center">
+                        <span class="inline-block w-3 h-3 rounded-full ${
+                            e.risk === 'green' ? 'bg-accent-green' : 
+                            e.risk === 'yellow' ? 'bg-accent-yellow' : 'bg-accent-red'
+                        }"></span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderActivity() {
+            const feed = document.getElementById('activityFeed');
+            feed.innerHTML = activities.map(a => `
+                <div class="activity-item pb-3">
+                    <div class="flex items-start gap-3">
+                        <span class="text-xl">${a.icon}</span>
+                        <div>
+                            <p class="text-sm">${a.text}</p>
+                            <p class="text-xs text-gray-500 mt-1">${a.time}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRules() {
+            const panel = document.getElementById('rulesPanel');
+            panel.innerHTML = rules.map(r => `
+                <div class="glass-card p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="font-semibold">${r.name}</span>
+                        <div class="toggle-switch ${r.status}" onclick="toggleRule(${r.id})"></div>
+                    </div>
+                    <div class="text-sm text-gray-400 mb-2">
+                        <span class="text-accent-blue">IF:</span> ${r.condition}
+                    </div>
+                    <div class="text-sm text-gray-400 mb-3">
+                        <span class="text-accent-green">THEN:</span> ${r.action}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        Last triggered: ${r.lastTriggered}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ========================
+        // ACTIONS
+        // ========================
+
+        function toggleEntityDropdown() {
+            const dropdown = document.getElementById('entityDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function selectEntity(name) {
+            document.getElementById('selectedEntity').textContent = name;
+            document.getElementById('entityDropdown').classList.add('hidden');
+            // Simulate data refresh
+            showToast(`Switched to ${name}`);
+        }
+
+        function toggleRule(id) {
+            const rule = rules.find(r => r.id === id);
+            if (rule) {
+                rule.status = rule.status === 'active' ? 'inactive' : 'active';
+                renderRules();
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 right-6 glass-card px-4 py-3 text-sm animate-slide';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.relative')) {
+                document.getElementById('entityDropdown').classList.add('hidden');
+            }
+        });
+
+        // ========================
+        // INIT
+        // ========================
+
+        renderEntities();
+        renderActivity();
+        renderRules();
+
+        // Simulate real-time updates
+        setInterval(() => {
+            // Randomly update one activity
+            const newActivities = [
+                { time: 'Just now', icon: '🔄', text: 'Bank feed processing...', type: 'info' },
+                { time: 'Just now', icon: '✅', text: 'Transaction matched automatically', type: 'success' },
+                { time: 'Just now', icon: '📊', text: 'Cash position updated', type: 'info' },
+            ];
+            const randomActivity = newActivities[Math.floor(Math.random() * newActivities.length)];
+            activities.unshift(randomActivity);
+            if (activities.length > 10) activities.pop();
+            renderActivity();
+        }, 15000);
+    </script>
+</body>
+</html>

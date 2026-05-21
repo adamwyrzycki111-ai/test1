@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetOps Control - Logistics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        dark: { 900: '#0f1115', 800: '#161920', 700: '#1e222a', 600: '#262b33', 500: '#303640' },
+                        brand: { DEFAULT: '#3b82f6', light: '#60a5fa', dark: '#2563eb' },
+                        success: '#10b981', warning: '#f59e0b', danger: '#ef4444', info: '#06b6d4'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { scrollbar-width: thin; scrollbar-color: #303640 #161920; }
+        body { font-family: 'Inter', sans-serif; background: #0f1115; color: #e2e8f0; }
+        .glass { background: rgba(30, 34, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .card { background: #161920; border: 1px solid #262b33; border-radius: 12px; transition: all 0.2s; }
+        .card:hover { border-color: #3b82f6; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 8px; color: #94a3b8; transition: all 0.2s; cursor: pointer; }
+        .nav-item:hover { background: rgba(59, 130, 246, 0.1); color: #e2e8f0; }
+        .nav-item.active { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .metric-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .status-active { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .status-delayed { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .status-completed { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .status-review { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .animate-fade { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation Sidebar -->
+    <aside class="fixed left-0 top-0 h-screen w-64 bg-dark-900 border-r border-dark-600 flex flex-col z-40">
+        <div class="p-5 border-b border-dark-600">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-brand flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg">FleetOps</h1>
+                    <span class="text-xs text-gray-500">Control Center</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-1" id="mainNav">
+            <div class="nav-item active" data-page="dashboard">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" data-page="tours">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <span>Tour Management</span>
+            </div>
+            <div class="nav-item" data-page="financial">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Financial Overview</span>
+            </div>
+            <div class="nav-item" data-page="roles">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/></svg>
+                <span>Role Management</span>
+            </div>
+            <div class="nav-item" data-page="health">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span>Data Health</span>
+            </div>
+            <div class="nav-item" data-page="integrations">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
+                <span>Integrations</span>
+            </div>
+        </nav>
+        
+        <div class="p-4 border-t border-dark-600">
+            <div class="flex items-center gap-3 p-3 rounded-lg bg-dark-800">
+                <div class="w-9 h-9 rounded-full bg-brand flex items-center justify-center text-sm font-bold">JD</div>
+                <div class="flex-1">
+                    <div class="text-sm font-medium">John Driver</div>
+                    <div class="text-xs text-gray-500">Dispatcher</div>
+                </div>
+                <button class="text-gray-500 hover:text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 p-8">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-2xl font-bold" id="pageTitle">Operations Dashboard</h2>
+                <p class="text-gray-500" id="pageSubtitle">Real-time fleet performance metrics</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/10 text-success text-sm">
+                    <span class="w-2 h-2 rounded-full bg-success pulse"></span>
+                    Live Data
+                </div>
+                <button class="px-4 py-2 bg-brand hover:bg-brand-dark rounded-lg text-sm font-medium transition" onclick="showPrintModal()">
+                    Export Report
+                </button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD PAGE -->
+        <div id="page-dashboard" class="page-content">
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-5 gap-4 mb-8">
+                <div class="card p-5 animate-fade">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-gray-400 text-sm">Daily Revenue</span>
+                        <span class="text-2xl">💰</span>
+                    </div>
+                    <div class="metric-value text-2xl text-white mb-1">$24,580</div>
+                    <div class="text-xs text-success">↑ 8.2% vs yesterday</div>
+                </div>
+                <div class="card p-5 animate-fade">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-gray-400 text-sm">Direct Costs</span>
+                        <span class="text-2xl">⛽</span>
+                    </div>
+                    <div class="metric-value text-2xl text-white mb-1">$8,942</div>
+                    <div class="text-xs text-success">↓ 3.1% vs yesterday</div>
+                </div>
+                <div class="card p-5 animate-fade">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-gray-400 text-sm">Contribution Margin</span>
+                        <span class="text-2xl">📈</span>
+                    </div>
+                    <div class="metric-value text-2xl text-success mb-1">$15,638</div>
+                    <div class="text-xs text-success">63.6% margin</div>
+                </div>
+                <div class="card p-5 animate-fade">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-gray-400 text-sm">Active Tours</span>
+                        <span class="text-2xl">🚛</span>
+                    </div>
+                    <div class="metric-value text-2xl text-white mb-1">18</div>
+                    <div class="text-xs text-warning">2 delayed</div>
+                </div>
+                <div class="card p-5 animate-fade">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-gray-400 text-sm">Operating Ratio</span>
+                        <span class="text-2xl">⚖️</span>
+                    </div>
+                    <div class="metric-value text-2xl text-white mb-1">84.2%</div>
+                    <div class="text-xs text-success">Target: <85%</div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <div class="card p-5 col-span-2">
+                    <h3 class="font-semibold mb-4">Weekly Margin Trend</h3>
+                    <canvas id="marginChart" height="120"></canvas>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-semibold mb-4">Tour Status</h3>
+                    <canvas id="tourChart" height="150"></canvas>
+                </div>
+            </div>
+
+            <!-- Second Row -->
+            <div class="grid grid-cols-2 gap-6 mb-8">
+                <div class="card p-5">
+                    <h3 class="font-semibold mb-4">Fuel Cost Trend (7 Days)</h3>
+                    <canvas id="fuelChart" height="100"></canvas>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-semibold mb-4">Driver Performance Score</h3>
+                    <div class="space-y-4" id="driverScores">
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center text-xs font-bold">MR</div>
+                            <div class="flex-1">
+                                <div class="flex justify-between text-sm mb-1"><span>Mike Roberts</span><span>94%</span></div>
+                                <div class="h-2 bg-dark-600 rounded-full"><div class="h-full w-[94%] bg-success rounded-full"></div></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center text-xs font-bold">SC</div>
+                            <div class="flex-1">
+                                <div class="flex justify-between text-sm mb-1"><span>Sarah Chen</span><span>91%</span></div>
+                                <div class="h-2 bg-dark-600 rounded-full"><div class="h-full w-[91%] bg-success rounded-full"></div></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 rounded-full bg-info/20 flex items-center justify-center text-xs font-bold">JT</div>
+                            <div class="flex-1">
+                                <div class="flex justify-between text-sm mb-1"><span>James Taylor</span><span>87%</span></div>
+                                <div class="h-2 bg-dark-600 rounded-full"><div class="h-full w-[87%] bg-brand rounded-full"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dispatch Activity & Alerts -->
+            <div class="grid grid-cols-2 gap-6">
+                <div class="card p-5">
+                    <h3 class="font-semibold mb-4">Dispatch Activity</h3>
+                    <div class="space-y-3" id="dispatchActivity">
+                        <div class="flex items-start gap-3 p-3 rounded-lg bg-dark-800">
+                            <span class="text-lg">🚛</span>
+                            <div>
+                                <div class="text-sm">Tour #2847 departed Terminal Alpha</div>
+                                <div class="text-xs text-gray-500">2 min ago</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 rounded-lg bg-dark-800">
+                            <span class="text-lg">✅</span>
+                            <div>
+                                <div class="text-sm">Tour #2843 completed - On-time arrival</div>
+                                <div class="text-xs text-gray-500">15 min ago</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 rounded-lg bg-dark-800">
+                            <span class="text-lg">⚠️</span>
+                            <div>
+                                <div class="text-sm">Tour #2845 delayed - Traffic on I-95</div>
+                                <div class="text-xs text-gray-500">28 min ago</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 rounded-lg bg-dark-800">
+                            <span class="text-lg">⛽</span>
+                            <div>
+                                <div class="text-sm">Fuel receipt uploaded - Truck T-042</div>
+                                <div class="text-xs text-gray-500">45 min ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-semibold mb-4">Alerts & Warnings</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-danger/10 border border-danger/20">
+                            <span class="text-danger">⚠️</span>
+                            <div class="flex-1">
+                                <div class="text-sm text-danger">Truck T-038 needs maintenance</div>
+                                <div class="text-xs text-gray-500">Scheduled service overdue</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-warning/10 border border-warning/20">
+                            <span class="text-warning">⏰</span>
+                            <div class="flex-1">
+                                <div class="text-sm text-warning">Tour #2848 dispatch in 15 min</div>
+                                <div class="text-xs text-gray-500">Driver not confirmed</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-info/10 border border-info/20">
+                            <span class="text-info">📋</span>
+                            <div class="flex-1">
+                                <div class="text-sm text-info">Missing fuel receipt - Tour #2841</div>
+                                <div class="text-xs text-gray-500">3 days outstanding</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOURS PAGE -->
+        <div id="page-tours" class="page-content hidden">
+            <div class="card mb-6">
+                <div class="p-4 border-b border-dark-600 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <input type="text" placeholder="Search tours..." class="bg-dark-700 border border-dark-600 rounded-lg px-4 py-2 text-sm w-64">
+                        <select class="bg-dark-700 border border-dark-600 rounded-lg px-4 py-2 text-sm">
+                            <option>All Status</option>
+                            <option>Active</option>
+                            <option>Delayed</option>
+                            <option>Completed</option>
+                            <option>Needs Review</option>
+                        </select>
+                        <select class="bg-dark-700 border border-dark-600 rounded-lg px-4 py-2 text-sm">
+                            <option>All Drivers</option>
+                            <option>Mike Roberts</option>
+                            <option>Sarah Chen</option>
+                            <option>James Taylor</option>
+                        </select>
+                    </div>
+                    <button class="px-4 py-2 bg-brand hover:bg-brand-dark rounded-lg text-sm font-medium" onclick="showTourModal()">+ New Tour</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-400 text-sm border-b border-dark-600">
+                                <th class="p-4 font-medium">Tour ID</th>
+                                <th class="p-4 font-medium">Truck</th>
+                                <th class="p-4 font-medium">Driver</th>
+                                <th class="p-4 font-medium">Route</th>
+                                <th class="p-4 font-medium text-right">Revenue</th>
+                                <th class="p-4 font-medium text-right">Cost</th>
+                                <th class="p-4 font-medium text-right">Margin</th>
+                                <th class="p-4 font-medium">Status</th>
+                                <th class="p-4 font-medium">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tourTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FINANCIAL PAGE -->
+        <div id="page-financial" class="page-content hidden">
+            <div id="financialLock" class="flex items-center justify-center min-h-[60vh]">
+                <div class="card p-8 max-w-md w-full text-center">
+                    <div class="w-16 h-16 rounded-full bg-dark-700 flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Executive Dashboard</h3>
+                    <p class="text-gray-400 mb-6">Enter passcode to view financial overview</p>
+                    <input type="password" id="passcodeInput" placeholder="Enter passcode" class="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-center mb-4">
+                    <button onclick="unlockFinancial()" class="w-full py-3 bg-brand hover:bg-brand-dark rounded-lg font-medium">Unlock</button>
+                    <p class="text-xs text-gray-500 mt-4">Demo code: FLEET2026</p>
+                </div>
+            </div>
+            <div id="financialContent" class="hidden">
+                <div class="grid grid-cols-4 gap-4 mb-8">
+                    <div class="card p-5"><div class="text-gray-400 text-sm mb-1">Monthly Revenue</div><div class="metric-value text-2xl text-white">$736,200</div></div>
+                    <div class="card p-5"><div class="text-gray-400 text-sm mb-1">Operating Ratio</div><div class="metric-value text-2xl text-white">82.4%</div></div>
+                    <div class="card p-5"><div class="text-gray-400 text-sm mb-1">Contribution Margin</div><div class="metric-value text-2xl text-success">$129,450</div></div>
+                    <div class="card p-5"><div class="text-gray-400 text-sm mb-1">Burn Rate</div><div class="metric-value text-2xl text-warning">$18,500/day</div></div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="card p-5"><h3 class="font-semibold mb-4">Revenue by Customer</h3><canvas id="customerChart" height="200"></canvas></div>
+                    <div class="card p-5"><h3 class="font-semibold mb-4">Weekly Trend</h3><canvas id="weeklyChart" height="200"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROLES PAGE -->
+        <div id="page-roles" class="page-content hidden">
+            <div class="grid grid-cols-3 gap-6" id="roleCards"></div>
+        </div>
+
+        <!-- HEALTH PAGE -->
+        <div id="page-health" class="page-content hidden">
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <div class="card p-5 border-l-4 border-l-success">
+                    <div class="flex items-center justify-between mb-3"><span class="text-gray-400">GPS Sync Status</span><span class="status-badge status-active">Healthy</span></div>
+                    <div class="text-2xl font-bold text-success">98.2%</div>
+                    <div class="text-xs text-gray-500">Last sync: 2 min ago</div>
+                </div>
+                <div class="card p-5 border-l-4 border-l-success">
+                    <div class="flex items-center justify-between mb-3"><span class="text-gray-400">Fuel Receipts</span><span class="status-badge status-active">Healthy</span></div>
+                    <div class="text-2xl font-bold text-success">94%</div>
+                    <div class="text-xs text-gray-500">6 missing</div>
+                </div>
+                <div class="card p-5 border-l-4 border-l-warning">
+                    <div class="flex items-center justify-between mb-3"><span class="text-gray-400">Tours Without Drivers</span><span class="status-badge status-review">Warning</span></div>
+                    <div class="text-2xl font-bold text-warning">3</div>
+                    <div class="text-xs text-gray-500">Unassigned tours</div>
+                </div>
+            </div>
+            <div class="card p-5">
+                <h3 class="font-semibold mb-4">Data Health Issues</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-4 rounded-lg bg-danger/10">
+                        <div class="flex items-center gap-3"><span class="text-danger">⚠️</span><span>Missing fuel receipts - Tour #2841, #2838</span></div>
+                        <span class="text-xs text-danger">3 days old</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 rounded-lg bg-warning/10">
+                        <div class="flex items-center gap-3"><span class="text-warning">👤</span><span>Unassigned tours - Tour #2850, #2851, #2852</span></div>
+                        <span class="text-xs text-warning">24h+</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 rounded-lg bg-info/10">
+                        <div class="flex items-center gap-3"><span class="text-info">📋</span><span>GPS sync delay - Truck T-045</span></div>
+                        <span class="text-xs text-info">1 hour</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTEGRATIONS PAGE -->
+        <div id="page-integrations" class="page-content hidden">
+            <div class="grid grid-cols-3 gap-6" id="integrationCards"></div>
+        </div>
+    </main>
+
+    <!-- Tour Modal -->
+    <div id="tourModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="card w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-5 border-b border-dark-600 flex items-center justify-between">
+                <h3 class="text-lg font-semibold">Create New Tour</h3>
+                <button onclick="hideTourModal()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-sm text-gray-400 block mb-2">Truck</label><select class="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-2"><option>T-038</option><option>T-042</option><option>T-045</option></select></div>
+                    <div><label class="text-sm text-gray-400 block mb-2">Driver</label><select class="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-2"><option>Mike Roberts</option><option>Sarah Chen</option><option>James Taylor</option></select></div>
+                </div>
+                <div><label class="text-sm text-gray-400 block mb-2">Route</label><select class="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-2"><option>Alpha Route - NYC to Boston</option><option>Beta Route - NYC to Philly</option><option>Gamma Route - Regional</option></select></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-sm text-gray-400 block mb-2">Est. Revenue</label><input type="number" class="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-2" placeholder="$"></div>
+                    <div><label class="text-sm text-gray-400 block mb-2">Est. Cost</label><input type="number" class="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-2" placeholder="$"></div>
+                </div>
+            </div>
+            <div class="p-5 border-t border-dark-600 flex justify-end gap-3">
+                <button onclick="hideTourModal()" class="px-4 py-2 bg-dark-700 rounded-lg text-sm">Cancel</button>
+                <button class="px-4 py-2 bg-brand rounded-lg text-sm">Create Tour</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Modal -->
+    <div id="printModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="card w-full max-w-md">
+            <div class="p-5 border-b border-dark-600">
+                <h3 class="text-lg font-semibold">Export Report</h3>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="flex items-center justify-between p-4 rounded-lg bg-dark-800 cursor-pointer hover:bg-dark-700">
+                    <div><div class="font-medium">Operations Summary</div><div class="text-sm text-gray-500">Daily KPIs and metrics</div></div>
+                    <span class="text-gray-400">📄</span>
+                </div>
+                <div class="flex items-center justify-between p-4 rounded-lg bg-dark-800 cursor-pointer hover:bg-dark-700">
+                    <div><div class="font-medium">Tour Detail Report</div><div class="text-sm text-gray-500">All active tours</div></div>
+                    <span class="text-gray-400">🚛</span>
+                </div>
+                <div class="flex items-center justify-between p-4 rounded-lg bg-dark-800 cursor-pointer hover:bg-dark-700">
+                    <div><div class="font-medium">Financial Summary</div><div class="text-sm text-gray-500">Revenue and costs</div></div>
+                    <span class="text-gray-400">💰</span>
+                </div>
+            </div>
+            <div class="p-5 border-t border-dark-600">
+                <button onclick="document.getElementById('printModal').classList.add('hidden')" class="w-full py-2 bg-dark-700 rounded-lg text-sm">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ======================== DATA ========================
+        const tours = [
+            { id: 'TR-2847', truck: 'T-038', driver: 'Mike Roberts', route: 'Alpha - NYC to Boston', revenue: 2400, cost: 890, margin: 63, status: 'active', start: '08:00' },
+            { id: 'TR-2848', truck: 'T-042', driver: 'Sarah Chen', route: 'Beta - NYC to Philly', revenue: 1850, cost: 720, margin: 61, status: 'active', start: '09:30' },
+            { id: 'TR-2849', truck: 'T-045', driver: 'James Taylor', route: 'Gamma - Regional', revenue: 1200, cost: 580, margin: 52, status: 'delayed', start: '07:15' },
+            { id: 'TR-2843', truck: 'T-038', driver: 'Mike Roberts', route: 'Alpha - NYC to Boston', revenue: 2400, cost: 850, margin: 65, status: 'completed', start: '06:00', end: '14:30' },
+            { id: 'TR-2844', truck: 'T-042', driver: 'Sarah Chen', route: 'Delta - Express', revenue: 980, cost: 340, margin: 65, status: 'completed', start: '05:00', end: '11:00' },
+            { id: 'TR-2850', truck: 'T-051', driver: 'Unassigned', route: 'Beta - NYC to Philly', revenue: 1850, cost: 750, margin: 59, status: 'review', start: '-' },
+        ];
+
+        const roles = [
+            { name: 'Dispatcher', color: 'brand', access: 'Full dispatch, tour management', modules: ['Dashboard', 'Tours', 'Data Health'], restrictions: ['Financial', 'Roles'] },
+            { name: 'Supervisor', color: 'success', access: 'All operations', modules: ['Dashboard', 'Tours', 'Financial', 'Data Health'], restrictions: [] },
+            { name: 'Finance', color: 'warning', access: 'Financial reports only', modules: ['Dashboard', 'Financial'], restrictions: ['Tours', 'Roles', 'Data Health'] },
+            { name: 'Executive', color: 'info', access: 'Full access, all reports', modules: ['Dashboard', 'Tours', 'Financial', 'Roles', 'Data Health', 'Integrations'], restrictions: [] },
+            { name: 'Driver', color: 'purple', access: 'Mobile app only', modules: ['Mobile App'], restrictions: ['All admin modules'] },
+        ];
+
+        const integrations = [
+            { name: 'GPS Tracking', provider: 'FleetTrack API', status: 'connected', icon: '📍' },
+            { name: 'Fuel Cards', provider: 'FuelMaster', status: 'connected', icon: '⛽' },
+            { name: 'Accounting', provider: 'QuickBooks', status: 'connected', icon: '📊' },
+            { name: 'Maintenance', provider: 'FleetCare', status: 'planned', icon: '🔧' },
+            { name: 'Driver App', provider: 'FleetMobile', status: 'beta', icon: '📱' },
+            { name: 'Notifications', provider: 'NotifyPro', status: 'offline', icon: '🔔' },
+        ];
+
+        // ======================== CHARTS ========================
+        function initCharts() {
+            new Chart(document.getElementById('marginChart'), {
+                type: 'line',
+                data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ data: [12400, 15200, 14800, 16500, 18200, 15600, 15638], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4 }] },
+                options: { plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#262b33' }, ticks: { color: '#94a3b8' } }, y: { grid: { color: '#262b33' }, ticks: { color: '#94a3b8', callback: v => '$' + v/1000 + 'k' } } } }
+            });
+
+            new Chart(document.getElementById('tourChart'), {
+                type: 'doughnut',
+                data: { labels: ['Active', 'Completed', 'Delayed', 'Review'], datasets: [{ data: [12, 8, 2, 2], backgroundColor: ['#3b82f6', '#10b981', '#ef4444', '#f59e0b'] }] },
+                options: { plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } } }
+            });
+
+            new Chart(document.getElementById('fuelChart'), {
+                type: 'bar',
+                data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ data: [1250, 1180, 1320, 1290, 1410, 980, 812], backgroundColor: '#f59e0b' }] },
+                options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#94a3b8' } }, y: { grid: { color: '#262b33' }, ticks: { color: '#94a3b8', callback: v => '$' + v } } } }
+            });
+        }
+
+        // ======================== RENDER ========================
+        function renderTours() {
+            const tbody = document.getElementById('tourTable');
+            tbody.innerHTML = tours.map(t => `
+                <tr class="border-b border-dark-600 hover:bg-dark-800">
+                    <td class="p-4 font-medium">${t.id}</td>
+                    <td class="p-4">${t.truck}</td>
+                    <td class="p-4">${t.driver}</td>
+                    <td class="p-4 text-sm">${t.route}</td>
+                    <td class="p-4 text-right metric-value">$${t.revenue.toLocaleString()}</td>
+                    <td class="p-4 text-right metric-value">$${t.cost.toLocaleString()}</td>
+                    <td class="p-4 text-right metric-value ${t.margin >= 60 ? 'text-success' : t.margin >= 50 ? 'text-warning' : 'text-danger'}">${t.margin}%</td>
+                    <td class="p-4"><span class="status-badge status-${t.status}">${t.status}</span></td>
+                    <td class="p-4"><button class="text-gray-400 hover:text-white">⋮</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderRoles() {
+            const container = document.getElementById('roleCards');
+            container.innerHTML = roles.map(r => `
+                <div class="card p-5">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-${r.color}/20 flex items-center justify-center text-${r.color} font-bold">${r.name[0]}</div>
+                        <div><div class="font-semibold">${r.name}</div><div class="text-xs text-gray-500">${r.access}</div></div>
+                    </div>
+                    <div class="mb-3"><div class="text-xs text-gray-400 mb-2">Allowed Modules</div><div class="flex flex-wrap gap-1">${r.modules.map(m => `<span class="px-2 py-1 bg-success/10 text-success text-xs rounded">${m}</span>`).join('')}</div></div>
+                    <div><div class="text-xs text-gray-400 mb-2">Restricted</div><div class="flex flex-wrap gap-1">${r.restrictions.length ? r.restrictions.map(m => `<span class="px-2 py-1 bg-danger/10 text-danger text-xs rounded">${m}</span>`).join('') : '<span class="text-xs text-gray-500">None</span>'}</div></div>
+                </div>
+            `).join('');
+        }
+
+        function renderIntegrations() {
+            const container = document.getElementById('integrationCards');
+            container.innerHTML = integrations.map(i => `
+                <div class="card p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-3xl">${i.icon}</span>
+                        <span class="status-badge ${i.status === 'connected' ? 'status-active' : i.status === 'planned' ? 'status-review' : i.status === 'beta' ? 'bg-purple-500/20 text-purple-400' : 'status-delayed'}">${i.status}</span>
+                    </div>
+                    <div class="font-semibold mb-1">${i.name}</div>
+                    <div class="text-sm text-gray-500 mb-3">${i.provider}</div>
+                    <button class="w-full py-2 bg-dark-700 hover:bg-dark-600 rounded-lg text-sm transition">Configure</button>
+                </div>
+            `).join('');
+        }
+
+        // ======================== NAVIGATION ========================
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const page = item.dataset.page;
+                document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+                document.getElementById('page-' + page).classList.remove('hidden');
+                document.getElementById('pageTitle').textContent = { dashboard: 'Operations Dashboard', tours: 'Tour Management', financial: 'Financial Overview', roles: 'Role Management', health: 'Data Health', integrations: 'Integrations' }[page];
+            });
+        });
+
+        // ======================== MODALS ========================
+        function showTourModal() { document.getElementById('tourModal').classList.remove('hidden'); }
+        function hideTourModal() { document.getElementById('tourModal').classList.add('hidden'); }
+        function showPrintModal() { document.getElementById('printModal').classList.remove('hidden'); }
+
+        function unlockFinancial() {
+            const input = document.getElementById('passcodeInput').value;
+            if (input === 'FLEET2026') {
+                document.getElementById('financialLock').classList.add('hidden');
+                document.getElementById('financialContent').classList.remove('hidden');
+                new Chart(document.getElementById('customerChart'), { type: 'bar', data: { labels: ['Acme Corp', 'GlobalShip', 'FastFreight'], datasets: [{ data: [245000, 189000, 156000], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'] }], options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#262b33' }, ticks: { color: '#94a3b8' } }, y: { grid: { display: false }, ticks: { color: '#94a3b8' } } } } });
+                new Chart(document.getElementById('weeklyChart'), { type: 'line', data: { labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'], datasets: [{ data: [165000, 182000, 178000, 211200], borderColor: '#3b82f6', tension: 0.4 }] }, options: { plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#262b33' }, ticks: { color: '#94a3b8' } }, y: { grid: { color: '#262b33' }, ticks: { color: '#94a3b8' } } } } });
+            } else {
+                alert('Invalid passcode. Try FLEET2026');
+            }
+        }
+
+        // ======================== INIT ========================
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            renderTours();
+            renderRoles();
+            renderIntegrations();
+        });
+
+        // Simulated live updates
+        setInterval(() => {
+            const activities = [
+                { icon: '🚛', text: 'Tour #2851 departed Terminal Beta' },
+                { icon: '✅', text: 'Tour #2847 arrived on-time' },
+                { icon: '⛽', text: 'Fuel receipt uploaded - T-042' },
+            ];
+            const item = activities[Math.floor(Math.random() * activities.length)];
+            const feed = document.getElementById('dispatchActivity');
+            feed.innerHTML = `<div class="flex items-start gap-3 p-3 rounded-lg bg-dark-800 animate-fade"><span class="text-lg">${item.icon}</span><div><div class="text-sm">${item.text}</div><div class="text-xs text-gray-500">Just now</div></div></div>` + feed.innerHTML;
+        }, 10000);
+    </script>
+</body>
+</html>

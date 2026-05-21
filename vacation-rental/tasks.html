@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks - StayHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div id="sidebar"></div>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header flex justify-between items-center">
+                <div>
+                    <h1 class="page-title">Tasks & Operations</h1>
+                    <p class="page-subtitle">Track maintenance and cleaning tasks</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('addTaskModal')">+ Add Task</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid mb-xl">
+                <div class="widget-card">
+                    <div class="widget-card-icon warning">⏳</div>
+                    <div class="widget-card-value">4</div>
+                    <div class="widget-card-label">Pending</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon primary">🔄</div>
+                    <div class="widget-card-value">2</div>
+                    <div class="widget-card-label">In Progress</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon success">✅</div>
+                    <div class="widget-card-value">12</div>
+                    <div class="widget-card-label">Completed</div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-card-icon error">⚠️</div>
+                    <div class="widget-card-value">1</div>
+                    <div class="widget-card-label">Overdue</div>
+                </div>
+            </div>
+
+            <!-- Tasks Table -->
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Type</th>
+                            <th>Assigned To</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskList">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Task Modal -->
+    <div class="modal-overlay" id="addTaskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Task</h3>
+                <button class="modal-close" onclick="closeModal('addTaskModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Task Title</label>
+                    <input type="text" class="form-input" placeholder="Enter task title">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Property</label>
+                    <select class="form-input">
+                        <option>Seaside Villa Paradise</option>
+                        <option>Mountain Retreat Cabin</option>
+                        <option>Lake House Escape</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Task Type</label>
+                    <select class="form-input">
+                        <option>Cleaning</option>
+                        <option>Maintenance</option>
+                        <option>Safety Inspection</option>
+                        <option>Landscaping</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Due Date</label>
+                        <input type="date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-input">
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Assigned To</label>
+                    <select class="form-input">
+                        <option>Maria (Cleaning)</option>
+                        <option>Tech Team</option>
+                        <option>Exterior Team</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" placeholder="Task details..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addTaskModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="addTask()">Add Task</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+    <script>
+        function addTask() {
+            alert('Task added successfully!');
+            closeModal('addTaskModal');
+        }
+    </script>
+</body>
+</html>

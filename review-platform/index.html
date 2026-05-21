@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrustScore - Review Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #fafbfc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f6f8fa;
+            --border: #d0d7de;
+            --border-light: #eaecef;
+            --text-primary: #1f2328;
+            --text-secondary: #656d76;
+            --text-muted: #8b949e;
+            --accent: #0969da;
+            --accent-hover: #0550ae;
+            --success: #1a7f37;
+            --success-light: #dafbe1;
+            --warning: #9a6700;
+            --warning-light: #fff8c5;
+            --error: #cf222e;
+            --error-light: #ffebe9;
+            --star-filled: #f5c518;
+            --star-empty: #d0d7de;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .nav-brand-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent), #55a3ff);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+            background: none;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-link.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--text-muted);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Header Section */
+        .header-section {
+            text-align: center;
+            padding: 48px 0 40px;
+        }
+
+        .header-section h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .header-section p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Search & Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            background: var(--bg-secondary);
+            transition: all 0.15s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15);
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            background: var(--bg-secondary);
+            min-width: 150px;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Business Grid */
+        .business-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .business-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .business-card:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .business-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .business-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .business-category {
+            font-size: 12px;
+            padding: 4px 10px;
+            background: var(--bg-tertiary);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .business-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .business-stats {
+            display: flex;
+            gap: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .stat-value.trust-high { color: var(--success); }
+        .stat-value.trust-medium { color: var(--warning); }
+        .stat-value.trust-low { color: var(--error); }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stars {
+            color: var(--star-filled);
+            letter-spacing: 2px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.15s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            background: var(--bg-secondary);
+            transition: all 0.15s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 500px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Rating Input */
+        .rating-input-group {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .rating-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .rating-field label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 4px;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--star-empty);
+            transition: all 0.1s ease;
+            padding: 2px;
+        }
+
+        .star-btn.filled {
+            color: var(--star-filled);
+        }
+
+        .star-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* Business Detail View */
+        .detail-header {
+            margin-bottom: 24px;
+        }
+
+        .detail-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .detail-meta {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .detail-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .score-card {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .score-card .score-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .score-card .score-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .score-card.high .score-value { color: var(--success); }
+        .score-card.medium .score-value { color: var(--warning); }
+        .score-card.low .score-value { color: var(--error); }
+
+        /* Reviews Section */
+        .reviews-section {
+            margin-top: 24px;
+        }
+
+        .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .reviews-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .review-card {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .review-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .review-verified {
+            font-size: 11px;
+            padding: 3px 8px;
+            background: var(--success-light);
+            color: var(--success);
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .review-scores {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .review-score {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .review-score .label {
+            color: var(--text-muted);
+        }
+
+        .review-comment {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .review-pros-cons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 500px) {
+            .review-pros-cons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pros-box, .cons-box {
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .pros-box strong, .cons-box strong {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .pros-box strong { color: var(--success); }
+        .cons-box strong { color: var(--error); }
+
+        /* Rating Breakdown */
+        .rating-breakdown {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .breakdown-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .breakdown-fill {
+            height: 100%;
+            background: var(--star-filled);
+            border-radius: 4px;
+        }
+
+        .breakdown-count {
+            font-size: 12px;
+            color: var(--text-muted);
+            width: 30px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Stats Footer */
+        .stats-footer {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 24px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-lg);
+            margin-bottom: 32px;
+        }
+
+        .footer-stat {
+            text-align: center;
+        }
+
+        .footer-stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .footer-stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 640px) {
+            .navbar {
+                padding: 0 16px;
+            }
+            
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .header-section h1 {
+                font-size: 32px;
+            }
+            
+            .header-section p {
+                font-size: 16px;
+            }
+            
+            .business-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand" onclick="showHome()">
+            <div class="nav-brand-icon">⭐</div>
+            TrustScore
+        </div>
+        <div class="nav-links">
+            <button class="nav-link active" onclick="showHome()">Businesses</button>
+            <button class="btn btn-primary" onclick="openAddBusinessModal()">+ Add Business</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1>Find Trusted Businesses</h1>
+            <p>Read and write reviews to help others find trustworthy services in your area.</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <input type="text" class="search-input" placeholder="Search businesses..." id="searchInput" oninput="filterBusinesses()">
+            <select class="filter-select" id="categoryFilter" onchange="filterBusinesses()">
+                <option value="">All Categories</option>
+                <option value="Restaurant">Restaurant</option>
+                <option value="Tech">Tech</option>
+                <option value="Retail">Retail</option>
+                <option value="Service">Service</option>
+                <option value="Health">Health</option>
+            </select>
+            <select class="filter-select" id="sortFilter" onchange="filterBusinesses()">
+                <option value="rating">Sort by Rating</option>
+                <option value="trust">Sort by Trust</option>
+                <option value="reviews">Sort by Reviews</option>
+                <option value="name">Sort by Name</option>
+            </select>
+        </div>
+
+        <!-- Stats Footer -->
+        <div class="stats-footer">
+            <div class="footer-stat">
+                <div class="footer-stat-value" id="totalBusinesses">0</div>
+                <div class="footer-stat-label">Businesses</div>
+            </div>
+            <div class="footer-stat">
+                <div class="footer-stat-value" id="totalReviews">0</div>
+                <div class="footer-stat-label">Reviews</div>
+            </div>
+            <div class="footer-stat">
+                <div class="footer-stat-value" id="avgRating">0.0</div>
+                <div class="footer-stat-label">Avg Rating</div>
+            </div>
+        </div>
+
+        <!-- Business Grid -->
+        <div class="business-grid" id="businessGrid"></div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">🔍</div>
+            <h3>No businesses found</h3>
+            <p>Try adjusting your search or filters, or add a new business!</p>
+        </div>
+    </main>
+
+    <!-- Add Business Modal -->
+    <div class="modal-overlay" id="addBusinessModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Add New Business</h2>
+                <button class="modal-close" onclick="closeModal('addBusinessModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="addBusinessForm" onsubmit="addBusiness(event)">
+                    <div class="form-group">
+                        <label class="form-label">Business Name</label>
+                        <input type="text" class="form-input" id="businessName" required placeholder="Enter business name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select class="form-select" id="businessCategory" required>
+                            <option value="">Select category</option>
+                            <option value="Restaurant">Restaurant</option>
+                            <option value="Tech">Tech</option>
+                            <option value="Retail">Retail</option>
+                            <option value="Service">Service</option>
+                            <option value="Health">Health</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="businessDescription" required placeholder="Describe this business..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addBusinessModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="document.getElementById('addBusinessForm').requestSubmit()">Add Business</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Detail Modal -->
+    <div class="modal-overlay" id="businessDetailModal">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>Business Details</h2>
+                <button class="modal-close" onclick="closeModal('businessDetailModal')">×</button>
+            </div>
+            <div class="modal-body" id="businessDetailContent"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('businessDetailModal'); openAddBusinessModal();">Edit Business</button>
+                <button class="btn btn-primary" onclick="openReviewModal()">Write Review</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Review Modal -->
+    <div class="modal-overlay" id="addReviewModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Write a Review</h2>
+                <button class="modal-close" onclick="closeModal('addReviewModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="addReviewForm" onsubmit="addReview(event)">
+                    <div class="rating-input-group">
+                        <div class="rating-field">
+                            <label>Overall Rating</label>
+                            <div class="rating-stars" id="ratingStars">
+                                <button type="button" class="star-btn" data-rating="1" onclick="setRating(1)">★</button>
+                                <button type="button" class="star-btn" data-rating="2" onclick="setRating(2)">★</button>
+                                <button type="button" class="star-btn" data-rating="3" onclick="setRating(3)">★</button>
+                                <button type="button" class="star-btn" data-rating="4" onclick="setRating(4)">★</button>
+                                <button type="button" class="star-btn" data-rating="5" onclick="setRating(5)">★</button>
+                            </div>
+                            <input type="hidden" id="reviewRating" required>
+                        </div>
+                        <div class="rating-field">
+                            <label>Quality Score</label>
+                            <div class="rating-stars" id="qualityStars">
+                                <button type="button" class="star-btn" data-rating="1" onclick="setQuality(1)">★</button>
+                                <button type="button" class="star-btn" data-rating="2" onclick="setQuality(2)">★</button>
+                                <button type="button" class="star-btn" data-rating="3" onclick="setQuality(3)">★</button>
+                                <button type="button" class="star-btn" data-rating="4" onclick="setQuality(4)">★</button>
+                                <button type="button" class="star-btn" data-rating="5" onclick="setQuality(5)">★</button>
+                            </div>
+                            <input type="hidden" id="reviewQuality" required>
+                        </div>
+                    </div>
+                    <div class="rating-input-group" style="margin-top: 16px;">
+                        <div class="rating-field">
+                            <label>Price Score</label>
+                            <div class="rating-stars" id="priceStars">
+                                <button type="button" class="star-btn" data-rating="1" onclick="setPrice(1)">★</button>
+                                <button type="button" class="star-btn" data-rating="2" onclick="setPrice(2)">★</button>
+                                <button type="button" class="star-btn" data-rating="3" onclick="setPrice(3)">★</button>
+                                <button type="button" class="star-btn" data-rating="4" onclick="setPrice(4)">★</button>
+                                <button type="button" class="star-btn" data-rating="5" onclick="setPrice(5)">★</button>
+                            </div>
+                            <input type="hidden" id="reviewPrice" required>
+                        </div>
+                        <div class="rating-field">
+                            <label>Support Score</label>
+                            <div class="rating-stars" id="supportStars">
+                                <button type="button" class="star-btn" data-rating="1" onclick="setSupport(1)">★</button>
+                                <button type="button" class="star-btn" data-rating="2" onclick="setSupport(2)">★</button>
+                                <button type="button" class="star-btn" data-rating="3" onclick="setSupport(3)">★</button>
+                                <button type="button" class="star-btn" data-rating="4" onclick="setSupport(4)">★</button>
+                                <button type="button" class="star-btn" data-rating="5" onclick="setSupport(5)">★</button>
+                            </div>
+                            <input type="hidden" id="reviewSupport" required>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label class="form-label">Pros</label>
+                        <textarea class="form-textarea" id="reviewPros" placeholder="What did you like?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cons</label>
+                        <textarea class="form-textarea" id="reviewCons" placeholder="What could be improved?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Comment</label>
+                        <textarea class="form-textarea" id="reviewComment" placeholder="Share your experience..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="reviewVerified" style="width: 18px; height: 18px;">
+                            <span style="font-size: 14px; font-weight: 500;">Verified Purchase</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addReviewModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="document.getElementById('addReviewForm').requestSubmit()">Submit Review</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATA STRUCTURE ====================
+        let businesses = [
+            {
+                id: 1,
+                name: "TechFix Solutions",
+                description: "Professional IT support and consulting services for small businesses. We help companies of all sizes with their technology needs, from network setup to cloud migration.",
+                category: "Tech",
+                reviews: [
+                    { rating: 5, quality: 5, price: 4, support: 5, pros: "Fast response, knowledgeable staff", cons: "Slightly expensive", comment: "Great service! They resolved our network issues within hours.", verified: true },
+                    { rating: 4, quality: 4, price: 3, support: 4, pros: "Professional team", cons: "No cons really", comment: "Good overall experience.", verified: false },
+                    { rating: 5, quality: 5, price: 4, support: 5, pros: "Excellent support", cons: "Limited weekend hours", comment: "Highly recommended for business IT needs.", verified: true }
+                ]
+            },
+            {
+                id: 2,
+                name: "Bella Italia",
+                description: "Authentic Italian restaurant serving traditional recipes passed down through generations. Fresh pasta made daily, with ingredients imported directly from Italy.",
+                category: "Restaurant",
+                reviews: [
+                    { rating: 5, quality: 5, price: 3, support: 4, pros: "Amazing food, authentic taste", cons: "Long wait times", comment: "Best pasta in town!", verified: true },
+                    { rating: 4, quality: 4, price: 4, support: 4, pros: "Good portions", cons: "Parking is difficult", comment: "Great for family dinners.", verified: true },
+                    { rating: 4, quality: 5, price: 3, support: 3, pros: "Fresh ingredients", cons: "Service can be slow", comment: "Food is worth the wait.", verified: false }
+                ]
+            },
+            {
+                id: 3,
+                name: "Wellness Plus Clinic",
+                description: "Full-service medical clinic with experienced doctors. We offer preventive care, chronic disease management, and wellness programs.",
+                category: "Health",
+                reviews: [
+                    { rating: 5, quality: 5, price: 4, support: 5, pros: "Caring doctors, thorough care", cons: "Hard to get appointments", comment: "Finally found a doctor who listens!", verified: true },
+                    { rating: 3, quality: 4, price: 3, support: 3, pros: "Clean facility", cons: "Long waits", comment: "Okay but needs improvement.", verified: false }
+                ]
+            },
+            {
+                id: 4,
+                name: "CodeCraft Academy",
+                description: "Professional coding bootcamp and software development training. We offer courses in web development, mobile apps, and data science for career changers.",
+                category: "Tech",
+                reviews: [
+                    { rating: 5, quality: 5, price: 3, support: 5, pros: "Great curriculum, job support", cons: "Intense workload", comment: "Changed my career! Now working as a developer.", verified: true },
+                    { rating: 4, quality: 4, price: 4, support: 4, pros: "Hands-on projects", cons: "Online format", comment: "Good learning experience.", verified: true }
+                ]
+            },
+            {
+                id: 5,
+                name: "GreenLeaf Market",
+                description: "Organic grocery store with locally sourced produce. We prioritize sustainable farming and fair trade products.",
+                category: "Retail",
+                reviews: [
+                    { rating: 4, quality: 5, price: 3, support: 4, pros: "Fresh organic produce", cons: "Higher prices", comment: "Love the quality!", verified: true },
+                    { rating: 4, quality: 4, price: 4, support: 3, pros: "Good selection", cons: "Limited hours", comment: "Great local option.", verified: false }
+                ]
+            },
+            {
+                id: 6,
+                name: "Spark Cleaning Co.",
+                description: "Professional residential and commercial cleaning services. We use eco-friendly products and are insured.",
+                category: "Service",
+                reviews: [
+                    { rating: 5, quality: 5, price: 4, support: 5, pros: "Thorough cleaning, reliable", cons: "None", comment: "Best cleaning service we've used!", verified: true },
+                    { rating: 4, quality: 4, price: 5, support: 4, pros: "Good value", cons: "Occasional no-shows", comment: "Generally satisfied.", verified: true }
+                ]
+            }
+        ];
+
+        let currentBusinessId = null;
+        let currentRating = 0;
+        let currentQuality = 0;
+        let currentPrice = 0;
+        let currentSupport = 0;
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function generateStars(count) {
+            return '★'.repeat(Math.round(count)) + '☆'.repeat(5 - Math.round(count));
+        }
+
+        function calculateAverage(reviews, field) {
+            if (!reviews.length) return 0;
+            const sum = reviews.reduce((acc, r) => acc + (r[field] || 0), 0);
+            return sum / reviews.length;
+        }
+
+        function calculateTrustScore(business) {
+            const reviews = business.reviews;
+            if (!reviews.length) return 0;
+            
+            const avgRating = calculateAverage(reviews, 'rating');
+            const reviewCount = reviews.length;
+            const verifiedCount = reviews.filter(r => r.verified).length;
+            
+            // Trust score formula: base from avg rating + bonus for number of reviews + bonus for verified reviews
+            let trustScore = (avgRating * 20) + (Math.min(reviewCount, 10)) + (verifiedCount * 5);
+            
+            // Cap at 100
+            return Math.min(100, Math.round(trustScore));
+        }
+
+        function getTrustClass(score) {
+            if (score >= 70) return 'trust-high';
+            if (score >= 40) return 'trust-medium';
+            return 'trust-low';
+        }
+
+        function getScoreClass(score) {
+            if (score >= 4) return 'high';
+            if (score >= 3) return 'medium';
+            return 'low';
+        }
+
+        // ==================== RENDER FUNCTIONS ====================
+        function renderBusinesses() {
+            const grid = document.getElementById('businessGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+            const sortBy = document.getElementById('sortFilter').value;
+
+            let filtered = businesses.filter(b => {
+                const matchesSearch = b.name.toLowerCase().includes(searchTerm) || b.description.toLowerCase().includes(searchTerm);
+                const matchesCategory = !category || b.category === category;
+                return matchesSearch && matchesCategory;
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                switch(sortBy) {
+                    case 'rating': return calculateAverage(b.reviews, 'rating') - calculateAverage(a.reviews, 'rating');
+                    case 'trust': return calculateTrustScore(b) - calculateTrustScore(a);
+                    case 'reviews': return b.reviews.length - a.reviews.length;
+                    case 'name': return a.name.localeCompare(b.name);
+                    default: return 0;
+                }
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            grid.innerHTML = filtered.map(business => {
+                const avgRating = calculateAverage(business.reviews, 'rating');
+                const trustScore = calculateTrustScore(business);
+                
+                return `
+                    <div class="business-card fade-in" onclick="showBusinessDetail(${business.id})">
+                        <div class="business-card-header">
+                            <div class="business-name">${business.name}</div>
+                            <span class="business-category">${business.category}</span>
+                        </div>
+                        <div class="business-description">${business.description}</div>
+                        <div class="business-stats">
+                            <div class="stat-box">
+                                <div class="stat-value stars">${generateStars(avgRating)}</div>
+                                <div class="stat-label">${avgRating.toFixed(1)} rating</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value ${getTrustClass(trustScore)}">${trustScore}%</div>
+                                <div class="stat-label">Trust Score</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${business.reviews.length}</div>
+                                <div class="stat-label">Reviews</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Update stats
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalReviews = businesses.reduce((acc, b) => acc + b.reviews.length, 0);
+            const allRatings = businesses.flatMap(b => b.reviews.map(r => r.rating));
+            const avgRating = allRatings.length ? (allRatings.reduce((a, b) => a + b, 0) / allRatings.length) : 0;
+
+            document.getElementById('totalBusinesses').textContent = businesses.length;
+            document.getElementById('totalReviews').textContent = totalReviews;
+            document.getElementById('avgRating').textContent = avgRating.toFixed(1);
+        }
+
+        function showBusinessDetail(id) {
+            currentBusinessId = id;
+            const business = businesses.find(b => b.id === id);
+            if (!business) return;
+
+            const avgRating = calculateAverage(business.reviews, 'rating');
+            const avgQuality = calculateAverage(business.reviews, 'quality');
+            const avgPrice = calculateAverage(business.reviews, 'price');
+            const avgSupport = calculateAverage(business.reviews, 'support');
+            const trustScore = calculateTrustScore(business);
+
+            // Rating breakdown
+            const ratingCounts = [1,2,3,4,5].map(r => business.reviews.filter(review => Math.round(review.rating) === r).length);
+            const maxCount = Math.max(...ratingCounts, 1);
+
+            const content = `
+                <div class="detail-header">
+                    <h1>${business.name}</h1>
+                    <div class="detail-meta">
+                        <span class="business-category">${business.category}</span>
+                        <span style="color: var(--text-muted);">${business.reviews.length} reviews</span>
+                    </div>
+                </div>
+                
+                <p style="color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6;">${business.description}</p>
+                
+                <div class="detail-scores">
+                    <div class="score-card ${getScoreClass(avgRating)}">
+                        <div class="score-value">${avgRating.toFixed(1)}</div>
+                        <div class="score-label">Overall</div>
+                    </div>
+                    <div class="score-card ${getScoreClass(avgQuality)}">
+                        <div class="score-value">${avgQuality.toFixed(1)}</div>
+                        <div class="score-label">Quality</div>
+                    </div>
+                    <div class="score-card ${getScoreClass(avgPrice)}">
+                        <div class="score-value">${avgPrice.toFixed(1)}</div>
+                        <div class="score-label">Price</div>
+                    </div>
+                    <div class="score-card ${getScoreClass(avgSupport)}">
+                        <div class="score-value">${avgSupport.toFixed(1)}</div>
+                        <div class="score-label">Support</div>
+                    </div>
+                    <div class="score-card ${getScoreClass(trustScore / 20)}">
+                        <div class="score-value">${trustScore}%</div>
+                        <div class="score-label">Trust</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-weight: 600;">Rating Breakdown</span>
+                    </div>
+                    ${[5,4,3,2,1].map(i => `
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <span style="font-size: 13px; width: 20px;">${i} ★</span>
+                            <div class="breakdown-bar">
+                                <div class="breakdown-fill" style="width: ${(ratingCounts[i-1] / maxCount) * 100}%"></div>
+                            </div>
+                            <span class="breakdown-count">${ratingCounts[i-1]}</span>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="reviews-section">
+                    <div class="reviews-header">
+                        <h3>Reviews (${business.reviews.length})</h3>
+                    </div>
+                    ${business.reviews.length === 0 ? '<p style="color: var(--text-muted);">No reviews yet. Be the first to write one!</p>' : 
+                    business.reviews.map(review => `
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-rating">
+                                    <span class="stars">${generateStars(review.rating)}</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    ${review.verified ? '<span class="review-verified">Verified</span>' : ''}
+                                    <span class="review-meta">Recent</span>
+                                </div>
+                            </div>
+                            <div class="review-scores">
+                                <div class="review-score"><span class="label">Quality:</span> <strong>${review.quality}</strong></div>
+                                <div class="review-score"><span class="label">Price:</span> <strong>${review.price}</strong></div>
+                                <div class="review-score"><span class="label">Support:</span> <strong>${review.support}</strong></div>
+                            </div>
+                            ${review.comment ? `<div class="review-comment">${review.comment}</div>` : ''}
+                            ${review.pros || review.cons ? `
+                                <div class="review-pros-cons">
+                                    ${review.pros ? `<div class="pros-box"><strong>Pros</strong>${review.pros}</div>` : ''}
+                                    ${review.cons ? `<div class="cons-box"><strong>Cons</strong>${review.cons}</div>` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            document.getElementById('businessDetailContent').innerHTML = content;
+            openModal('businessDetailModal');
+        }
+
+        // ==================== MODAL FUNCTIONS ====================
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function openAddBusinessModal() {
+            document.getElementById('businessName').value = '';
+            document.getElementById('businessCategory').value = '';
+            document.getElementById('businessDescription').value = '';
+            openModal('addBusinessModal');
+        }
+
+        function openReviewModal() {
+            // Reset form
+            currentRating = 0;
+            currentQuality = 0;
+            currentPrice = 0;
+            currentSupport = 0;
+            updateStars('rating', 0);
+            updateStars('quality', 0);
+            updateStars('price', 0);
+            updateStars('support', 0);
+            document.getElementById('reviewPros').value = '';
+            document.getElementById('reviewCons').value = '';
+            document.getElementById('reviewComment').value = '';
+            document.getElementById('reviewVerified').checked = false;
+            
+            closeModal('businessDetailModal');
+            openModal('addReviewModal');
+        }
+
+        // ==================== RATING FUNCTIONS ====================
+        function updateStars(type, count) {
+            const container = document.getElementById(type + 'Stars');
+            const btns = container.querySelectorAll('.star-btn');
+            btns.forEach((btn, i) => {
+                btn.classList.toggle('filled', i < count);
+            });
+            const input = document.getElementById('review' + type.charAt(0).toUpperCase() + type.slice(1));
+            if (input) input.value = count;
+        }
+
+        function setRating(val) { currentRating = val; updateStars('rating', val); }
+        function setQuality(val) { currentQuality = val; updateStars('quality', val); }
+        function setPrice(val) { currentPrice = val; updateStars('price', val); }
+        function setSupport(val) { currentSupport = val; updateStars('support', val); }
+
+        // ==================== CRUD FUNCTIONS ====================
+        function addBusiness(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('businessName').value;
+            const category = document.getElementById('businessCategory').value;
+            const description = document.getElementById('businessDescription').value;
+
+            const newBusiness = {
+                id: Date.now(),
+                name,
+                category,
+                description,
+                reviews: []
+            };
+
+            businesses.push(newBusiness);
+            closeModal('addBusinessModal');
+            filterBusinesses();
+        }
+
+        function addReview(e) {
+            e.preventDefault();
+            
+            if (!currentRating || !currentQuality || !currentPrice || !currentSupport) {
+                alert('Please provide ratings for all categories');
+                return;
+            }
+
+            const business = businesses.find(b => b.id === currentBusinessId);
+            if (!business) return;
+
+            const newReview = {
+                rating: currentRating,
+                quality: currentQuality,
+                price: currentPrice,
+                support: currentSupport,
+                pros: document.getElementById('reviewPros').value,
+                cons: document.getElementById('reviewCons').value,
+                comment: document.getElementById('reviewComment').value,
+                verified: document.getElementById('reviewVerified').checked
+            };
+
+            business.reviews.push(newReview);
+            closeModal('addReviewModal');
+            filterBusinesses();
+        }
+
+        // ==================== NAVIGATION ====================
+        function showHome() {
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('.nav-link:first-child').classList.add('active');
+            filterBusinesses();
+        }
+
+        function filterBusinesses() {
+            renderBusinesses();
+        }
+
+        // ==================== INITIALIZE ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderBusinesses();
+        });
+
+        // Close modals on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // Close modals on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
