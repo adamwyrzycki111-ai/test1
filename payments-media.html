@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payments, Memberships & Media Platforms</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">Laravel Portfolio</a>
+      <div class="nav-links">
+        <a href="laravel-codebases.html">Laravel Codebases</a>
+        <a href="admin-dashboards.html">Admin Dashboards</a>
+        <a href="database-work.html">Database Work</a>
+        <a href="payments-media.html" class="active">Payments & Media</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container">
+      <h1 class="hero-title">Payments, Memberships & Media Platforms</h1>
+      <p class="hero-subtitle">Stripe integrations, subscription lifecycles, and media processing pipelines.</p>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+    <div class="container">
+      <!-- Stripe Subscriptions Section -->
+      <section class="section-block">
+        <h2 class="section-block-title">Stripe Subscription Management</h2>
+        <p class="section-block-desc">Complete subscription lifecycle handling from onboarding to retention.</p>
+        
+        <div class="card-grid">
+          <article class="card">
+            <h3 class="card-title">Subscription Lifecycle Implementation</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">What Was Built</h4>
+              <ul>
+                <li>Plan creation with tiered pricing and trial periods</li>
+                <li>Upgrade/downgrade handling with proration</li>
+                <li>Cancellation flows with retention offers</li>
+                <li>Dunning management for failed payments</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Technical Details</h4>
+              <ul>
+                <li>Webhook-driven state machine for subscription status</li>
+                <li>Idempotent event handling for reliability</li>
+                <li>Grace period logic for failed payments</li>
+                <li>Proration calculations with customer-facing preview</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">Multi-Plan Architecture</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">What Was Built</h4>
+              <ul>
+                <li>Bundle plans with nested product configuration</li>
+                <li>Seat-based pricing with automatic count updates</li>
+                <li>Add-on system with recurring and one-time options</li>
+                <li>Plan migration paths with feature gating</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Outcome</h4>
+              <ul>
+                <li>Supports 12+ pricing configurations without code changes</li>
+                <li>Plan changes reflect immediately in Stripe and app</li>
+                <li>Revenue attribution by plan for analytics</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Credit-Based Systems Section -->
+      <section class="section-block">
+        <h2 class="section-block-title">Credit-Based Systems</h2>
+        <p class="section-block-desc">Usage tracking and credit management for metered billing.</p>
+        
+        <div class="card-grid">
+          <article class="card">
+            <h3 class="card-title">API Credit System</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Features</h4>
+              <ul>
+                <li>Real-time credit balance with atomic decrements</li>
+                <li>Credit purchase with Stripe payment integration</li>
+                <li>Usage event ingestion with batch processing</li>
+                <li>Top-up suggestions based on usage velocity</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Implementation Details</h4>
+              <ul>
+                <li>Database transactions for credit operations</li>
+                <li>Optimistic locking to prevent race conditions</li>
+                <li>Event sourcing for usage audit trail</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Result</h4>
+              <ul>
+                <li>Credit operations: 99.99% accuracy</li>
+                <li>Zero customer disputes in 18 months</li>
+                <li>Handles 500k+ usage events daily</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">Overage Handling</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Features</h4>
+              <ul>
+                <li>Soft cap with warning thresholds</li>
+                <li>Hard cap with service pause capability</li>
+                <li>Overage pricing with customer confirmation</li>
+                <li>Credit rollover for unused monthly allocation</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Result</h4>
+              <span class="tag highlight">Revenue leakage from overages eliminated</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Webhooks and Billing Logic Section -->
+      <section class="section-block">
+        <h2 class="section-block-title">Webhooks & Billing Logic</h2>
+        <p class="section-block-desc">Reliable payment event processing with proper safeguards.</p>
+        
+        <div class="card-grid">
+          <article class="card">
+            <h3 class="card-title">Webhook Infrastructure</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">What Was Built</h4>
+              <ul>
+                <li>Signature verification for all payment webhooks</li>
+                <li>Idempotency handling to prevent duplicate processing</li>
+                <li>Retry queue for failed event processing</li>
+                <li>Dead letter queue for unresolvable events</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Outcome</h4>
+              <ul>
+                <li>Zero duplicate charges or credits</li>
+                <li>Webhook processing: 99.9% success rate</li>
+                <li>Manual intervention required: less than 1/week</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">Invoice Generation</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">What Was Built</h4>
+              <ul>
+                <li>Custom invoice builder with company branding</li>
+                <li>Line item rendering with tax breakdown</li>
+                <li>Proration calculations for mid-cycle changes</li>
+                <li>PDF generation and email delivery</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Result</h4>
+              <ul>
+                <li>Customizable invoice templates per customer</li>
+                <li>Invoice generation time: under 2 seconds</li>
+                <li>Supports 15+ currencies</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Media Storage & Streaming Section -->
+      <section class="section-block">
+        <h2 class="section-block-title">Media Storage & Streaming</h2>
+        <p class="section-block-desc">S3/R2-based media pipelines with processing and delivery optimization.</p>
+        
+        <div class="card-grid">
+          <article class="card">
+            <h3 class="card-title">Video Upload & Processing Pipeline</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">What Was Built</h4>
+              <ul>
+                <li>Chunked upload with resume capability</li>
+                <li>Background processing for video transcoding</li>
+                <li>Adaptive bitrate streaming configuration</li>
+                <li>CDN integration for global delivery</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Technical Details</h4>
+              <ul>
+                <li>Queue-based processing with priority tiers</li>
+                <li>Progress tracking with WebSocket updates</li>
+                <li>Failure recovery with automatic retry</li>
+                <li>Storage lifecycle policies for cost optimization</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Result</h4>
+              <ul>
+                <li>Upload success rate: 99.5%</li>
+                <li>Processing time: 5-15 minutes for typical video</li>
+                <li>Storage costs reduced by 40% with lifecycle policies</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">Image Processing Service</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">What Was Built</h4>
+              <ul>
+                <li>On-demand resizing with URL signature verification</li>
+                <li>Automatic WebP/AVIF conversion</li>
+                <li>Watermark application for premium content</li>
+                <li>Lazy loading with blur placeholder generation</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Result</h4>
+              <ul>
+                <li>Image delivery latency: under 100ms from CDN</li>
+                <li>Bandwidth savings: 60% from format optimization</li>
+                <li>Zero unauthorized image access incidents</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">Secure Media Access</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">What Was Built</h4>
+              <ul>
+                <li>Signed URLs with expiration for sensitive content</li>
+                <li>IP restriction for corporate customers</li>
+                <li>Rate limiting per user and per content</li>
+                <li>Access logging for audit requirements</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Result</h4>
+              <ul>
+                <li>Content protection for premium media</li>
+                <li>Compliance-ready access logs</li>
+                <li>Flexible access control without infrastructure changes</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer-text">Laravel Developer Portfolio</p>
+    </div>
+  </footer>
+</body>
+</html>

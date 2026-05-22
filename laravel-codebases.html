@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laravel Applications in Existing Codebases</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">Laravel Portfolio</a>
+      <div class="nav-links">
+        <a href="laravel-codebases.html" class="active">Laravel Codebases</a>
+        <a href="admin-dashboards.html">Admin Dashboards</a>
+        <a href="database-work.html">Database Work</a>
+        <a href="payments-media.html">Payments & Media</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container">
+      <h1 class="hero-title">Laravel Applications in Existing Codebases</h1>
+      <p class="hero-subtitle">Supporting and extending established Laravel applications with minimal friction and maximum stability.</p>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+    <div class="container">
+      <h2 class="section-title">Case Studies</h2>
+      
+      <div class="card-grid">
+        <!-- Case Study 1 -->
+        <article class="card">
+          <div class="card-header">
+            <h3 class="card-title">SaaS Analytics Platform</h3>
+            <span class="card-badge">SaaS</span>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">What Was Inherited</h4>
+            <ul>
+              <li>Legacy Laravel 5.4 codebase with minimal tests</li>
+              <li>Custom billing system using older Stripe API</li>
+              <li>Inconsistent database migrations across environments</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">What Was Improved</h4>
+            <ul>
+              <li>Refactored dashboard controllers for consistency</li>
+              <li>Upgraded Stripe integration to latest SDK</li>
+              <li>Added unit tests achieving 75% coverage</li>
+              <li>Implemented proper error handling and logging</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Outcome</h4>
+            <ul>
+              <li>Reduced production incidents by 60%</li>
+              <li>Dashboard load time improved from 2.3s to 400ms</li>
+              <li>Zero billing-related support tickets in 6 months</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Case Study 2 -->
+        <article class="card">
+          <div class="card-header">
+            <h3 class="card-title">Creator Platform</h3>
+            <span class="card-badge">Creator Platform</span>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">What Was Inherited</h4>
+            <ul>
+              <li>WordPress-based site with custom PHP plugin</li>
+              <li>No API structure or documentation</li>
+              <li>Spaghetti code with global variables throughout</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">What Was Improved</h4>
+            <ul>
+              <li>Migrated custom features to Laravel API</li>
+              <li>Built RESTful endpoints with proper auth</li>
+              <li>Created admin panel for content management</li>
+              <li>Implemented queue-based processing for uploads</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Outcome</h4>
+            <ul>
+              <li>API response time under 150ms for all endpoints</li>
+              <li>Support team can now manage content without dev help</li>
+              <li>Prepared foundation for mobile app integration</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Case Study 3 -->
+        <article class="card">
+          <div class="card-header">
+            <h3 class="card-title">B2B Marketplace</h3>
+            <span class="card-badge">Marketplace</span>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">What Was Inherited</h4>
+            <ul>
+              <li>Laravel 7 application with basic CRUD operations</li>
+              <li>No search functionality—full table scans on every query</li>
+              <li>Monolithic controllers handling 2000+ lines each</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">What Was Improved</h4>
+            <ul>
+              <li>Implemented Scout with Algolia for search</li>
+              <li>Extracted business logic to service classes</li>
+              <li>Added composite indexes for common filters</li>
+              <li>Built API rate limiting and caching layer</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Outcome</h4>
+            <ul>
+              <li>Search queries reduced from 3-4s to under 300ms</li>
+              <li>Code review time cut in half for new features</li>
+              <li>Successfully handled 3x traffic during promotional event</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Case Study 4 -->
+        <article class="card">
+          <div class="card-header">
+            <h3 class="card-title">Healthcare Scheduling System</h3>
+            <span class="card-badge">Healthcare SaaS</span>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">What Was Inherited</h4>
+            <ul>
+              <li>Laravel application with hardcoded timezone logic</li>
+              <li>Booking conflicts reported weekly by users</li>
+              <li>No validation on overlapping appointments</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">What Was Improved</h4>
+            <ul>
+              <li>Centralized timezone handling with Carbon</li>
+              <li>Added database-level locking for bookings</li>
+              <li>Built conflict detection service with retry logic</li>
+              <li>Implemented real-time availability checks</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Outcome</h4>
+            <ul>
+              <li>Booking conflicts reduced to zero</li>
+              <li>Appointment verification time: 50ms</li>
+              <li>System handles multi-timezone appointments correctly</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Case Study 5 -->
+        <article class="card">
+          <div class="card-header">
+            <h3 class="card-title">E-commerce Inventory Manager</h3>
+            <span class="card-badge">E-commerce</span>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">What Was Inherited</h4>
+            <ul>
+              <li>Dated Laravel 6 application with stock sync issues</li>
+              <li>Inventory updates via manual cron jobs</li>
+              <li>No webhook handling for supplier updates</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">What Was Improved</h4>
+            <ul>
+              <li>Built event-driven inventory sync system</li>
+              <li>Integrated supplier webhooks with validation</li>
+              <li>Added real-time stock web sockets for admin</li>
+              <li>Implemented optimistic locking for concurrent updates</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Outcome</h4>
+            <ul>
+              <li>Stock data syncs within 5 seconds of supplier updates</li>
+              <li>Zero overselling incidents since deployment</li>
+              <li>Inventory accuracy improved from 94% to 99.7%</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer-text">Laravel Developer Portfolio</p>
+    </div>
+  </footer>
+</body>
+</html>

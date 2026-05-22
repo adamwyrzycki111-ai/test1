@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Database Design, Optimization & Migrations</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">Laravel Portfolio</a>
+      <div class="nav-links">
+        <a href="laravel-codebases.html">Laravel Codebases</a>
+        <a href="admin-dashboards.html">Admin Dashboards</a>
+        <a href="database-work.html" class="active">Database Work</a>
+        <a href="payments-media.html">Payments & Media</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container">
+      <h1 class="hero-title">Database Design, Optimization & Migrations</h1>
+      <p class="hero-subtitle">Schema architecture, query performance, and safe production migrations.</p>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+    <div class="container">
+      <!-- Schema Design Section -->
+      <section class="section-block">
+        <h2 class="section-block-title">Schema Design for SaaS Systems</h2>
+        <p class="section-block-desc">Multi-tenant database patterns that balance performance, isolation, and maintainability.</p>
+        
+        <div class="card-grid">
+          <article class="card">
+            <h3 class="card-title">B2B SaaS Multi-Tenant Architecture</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Design Approach</h4>
+              <ul>
+                <li>Soft-deletion with organization_id foreign keys</li>
+                <li>Tenant-scoped queries via middleware</li>
+                <li>Row-level security patterns for sensitive data</li>
+                <li>Archive strategy for inactive tenants</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Outcome</h4>
+              <ul>
+                <li>Single database supports 500+ tenants without contention</li>
+                <li>Query isolation prevents cross-tenant data leaks</li>
+                <li>Tenant migration time: under 2 seconds average</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">E-commerce Catalog Schema</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Design Approach</h4>
+              <ul>
+                <li>Normalized product attributes (EAV pattern avoided)</li>
+                <li>Variant matrix with proper indexing</li>
+                <li>Inventory partitioned by warehouse location</li>
+                <li>Price history with effective date ranges</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Outcome</h4>
+              <ul>
+                <li>Product listing queries: under 50ms</li>
+                <li>Supports 100k+ SKUs without performance degradation</li>
+                <li>Price rollback capability within 1 second</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Query Optimization Section -->
+      <section class="section-block">
+        <h2 class="section-block-title">Query Optimization</h2>
+        <p class="section-block-desc">Real performance improvements from production systems.</p>
+        
+        <div class="card-grid">
+          <article class="card">
+            <div class="card-header">
+              <h3 class="card-title">Dashboard Analytics Query</h3>
+              <span class="tag highlight">Before: 3.8s → After: 420ms</span>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Problem</h4>
+              <p>N+1 queries loading aggregated metrics. Dashboard loaded 200+ separate queries for a single view.</p>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Solution</h4>
+              <ul>
+                <li>Consolidated to single query with indexed aggregations</li>
+                <li>Materialized view for real-time metrics</li>
+                <li>Redis caching layer with 5-minute TTL</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <h3 class="card-title">Search with Filters</h3>
+              <span class="tag highlight">Before: 2.1s → After: 85ms</span>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Problem</h4>
+              <p>Full table scan with PHP-side filtering. 50k records processed in memory for every search request.</p>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Solution</h4>
+              <ul>
+                <li>Composite indexes on filterable columns</li>
+                <li>Query scope pushed to database level</li>
+                <li>Pagination added to prevent offset performance issues</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <h3 class="card-title">User Activity Feed</h3>
+              <span class="tag highlight">Before: 1.4s → After: 95ms</span>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Problem</h4>
+              <p>Polymorphic relationships causing implicit joins. Feed generation touched 6 tables per item.</p>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Solution</h4>
+              <ul>
+                <li>Denormalized activity feed table with queue-based updates</li>
+                <li>Single table query with cursor-based pagination</li>
+                <li>Background job for feed recalculation on user action</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Indexing Strategies Section -->
+      <section class="section-block">
+        <h2 class="section-block-title">Indexing Strategies</h2>
+        <p class="section-block-desc">Targeted index solutions for common access patterns.</p>
+        
+        <div class="card-grid">
+          <article class="card">
+            <h3 class="card-title">Composite Indexes for Common Queries</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Approach</h4>
+              <ul>
+                <li>Identified top 20 slow queries via query analysis</li>
+                <li>Created composite indexes matching WHERE clause order</li>
+                <li>Covering indexes for read-heavy endpoints</li>
+                <li>Partial indexes for filtered queries</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Result</h4>
+              <span class="tag highlight">Average query time reduced 65%</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3 class="card-title">Text Search Optimization</h3>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Approach</h4>
+              <ul>
+                <li>MySQL full-text indexes for product search</li>
+                <li>Prefix index strategy for alphabetical browsing</li>
+                <li>GIN indexes for JSON data filtering</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Result</h4>
+              <span class="tag highlight">Search latency under 100ms on 1M+ rows</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Large-Scale Migrations Section -->
+      <section class="section-block">
+        <h2 class="section-block-title">Large-Scale Migrations</h2>
+        <p class="section-block-desc">Production-safe migration strategies for high-stakes systems.</p>
+        
+        <div class="card-grid">
+          <article class="card">
+            <div class="card-header">
+              <h3 class="card-title">Billing System Migration</h3>
+              <span class="card-badge">Zero Downtime</span>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Scope</h4>
+              <ul>
+                <li>Migrated payment processing from legacy system</li>
+                <li>2M+ transaction records</li>
+                <li>Stripe and PayPal dual integration</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Strategy</h4>
+              <ul>
+                <li>Dual-write period with reconciliation jobs</li>
+                <li>Shadow table migration pattern</li>
+                <li>Backfill with batch processing and rate limiting</li>
+                <li>Rollback capability via feature flag</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Result</h4>
+              <ul>
+                <li>Zero downtime deployment</li>
+                <li>Data consistency verified across both systems</li>
+                <li>Migration completed over single weekend</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <h3 class="card-title">User System Consolidation</h3>
+              <span class="card-badge">Zero Downtime</span>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Scope</h4>
+              <ul>
+                <li>Merged three legacy user tables into single schema</li>
+                <li>1.5M users with complex permission relationships</li>
+                <li>4 external integrations dependent on user IDs</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Strategy</h4>
+              <ul>
+                <li>UUID mapping layer for external references</li>
+                <li>Incremental migration with automatic retries</li>
+                <li>Read replica for validation before cutover</li>
+              </ul>
+            </div>
+            
+            <div class="card-section">
+              <h4 class="card-section-title">Result</h4>
+              <ul>
+                <li>External integrations unaffected</li>
+                <li>Zero failed logins during migration</li>
+                <li>Query performance improved by 40%</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer-text">Laravel Developer Portfolio</p>
+    </div>
+  </footer>
+</body>
+</html>

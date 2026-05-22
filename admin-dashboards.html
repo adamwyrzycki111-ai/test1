@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Tools & Internal Dashboards</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-brand">Laravel Portfolio</a>
+      <div class="nav-links">
+        <a href="laravel-codebases.html">Laravel Codebases</a>
+        <a href="admin-dashboards.html" class="active">Admin Dashboards</a>
+        <a href="database-work.html">Database Work</a>
+        <a href="payments-media.html">Payments & Media</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container">
+      <h1 class="hero-title">Admin Tools & Internal Dashboards</h1>
+      <p class="hero-subtitle">Internal tools that empower support teams and streamline operations—built with Laravel.</p>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+    <div class="container">
+      <div class="card-grid">
+        <!-- Dashboard 1 -->
+        <article class="card">
+          <div class="card-header">
+            <h3 class="card-title">Subscription Management Dashboard</h3>
+            <span class="card-badge">Internal Tool</span>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Features</h4>
+            <ul>
+              <li>Full CRUD for subscription lifecycle (pause, cancel, resume)</li>
+              <li>Filter by plan type, status, billing cycle, renewal date</li>
+              <li>Bulk actions for common operations</li>
+              <li>Audit log for all subscription changes with user attribution</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Purpose</h4>
+            <p>Replaces manual database queries for support team. Enables non-technical staff to handle subscription modifications without developer involvement.</p>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Impact</h4>
+            <ul>
+              <li>Support ticket resolution time reduced by 70%</li>
+              <li>Subscription-related requests no longer require dev involvement</li>
+              <li>Complete audit trail for compliance and dispute resolution</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Dashboard 2 -->
+        <article class="card">
+          <div class="card-header">
+            <h3 class="card-title">User Management System</h3>
+            <span class="card-badge">Internal Tool</span>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Features</h4>
+            <ul>
+              <li>User search across email, name, and ID with debounced input</li>
+              <li>Role-based access control with multi-select permissions</li>
+              <li>Account state management (suspend, deactivate, delete)</li>
+              <li>Session viewer showing active devices and last activity</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Purpose</h4>
+            <p>Centralized user administration for trust & safety team. Handles account investigations, fraud detection responses, and access control adjustments.</p>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Impact</h4>
+            <ul>
+              <li>Fraud case response time: from hours to minutes</li>
+              <li>Self-service account recovery rate: 85%</li>
+              <li>Zero accidental data exposure incidents</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Dashboard 3 -->
+        <article class="card">
+          <div class="card-header">
+            <h3 class="card-title">Revenue Analytics Dashboard</h3>
+            <span class="card-badge">Internal Tool</span>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Features</h4>
+            <ul>
+              <li>Real-time MRR, ARR, and churn metrics</li>
+              <li>Cohort analysis with configurable time windows</li>
+              <li>Upgrade/downgrade funnel visualization</li>
+              <li>Export capabilities for finance team reports</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Purpose</h4>
+            <p>Provides business stakeholders with self-service revenue insights without SQL queries. Built for non-technical decision makers who need accurate data.</p>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Impact</h4>
+            <ul>
+              <li>Eliminated weekly data export requests to engineering</li>
+              <li>Finance team can pull reports independently</li>
+              <li>Data discrepancies caught faster with live validation</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Dashboard 4 -->
+        <article class="card">
+          <div class="card-header">
+            <h3 class="card-title">Media & Content Moderation Panel</h3>
+            <span class="card-badge">Internal Tool</span>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Features</h4>
+            <ul>
+              <li>Queue-based content review workflow</li>
+              <li>Bulk approve/reject with reason tagging</li>
+              <li>Image and video preview with inline moderation tools</li>
+              <li>Auto-flag system based on content policies</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Purpose</h4>
+            <p>Moderation interface for content operations team. Handles user-uploaded media review, policy violation flagging, and appeal processing.</p>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Impact</h4>
+            <ul>
+              <li>Content review throughput: 300 items/hour per moderator</li>
+              <li>Policy consistency improved with structured workflows</li>
+              <li>Appeal resolution time reduced by 40%</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- Dashboard 5 -->
+        <article class="card">
+          <div class="card-header">
+            <h3 class="card-title">System Health Monitor</h3>
+            <span class="card-badge">Internal Tool</span>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Features</h4>
+            <ul>
+              <li>Real-time service status with uptime percentages</li>
+              <li>Failed job monitoring with retry capabilities</li>
+              <li>Database connection pool visualization</li>
+              <li>Scheduled task execution history with anomalies</li>
+            </ul>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Purpose</h4>
+            <p>Operations dashboard for engineering on-call rotation. Provides quick diagnosis capabilities and one-click remediation for common failure patterns.</p>
+          </div>
+          
+          <div class="card-section">
+            <h4 class="card-section-title">Impact</h4>
+            <ul>
+              <li>Mean time to diagnosis: reduced from 15 min to 3 min</li>
+              <li>On-call alert noise reduced by filtering non-actionable warnings</li>
+              <li>Junior engineers can handle incidents independently</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer-text">Laravel Developer Portfolio</p>
+    </div>
+  </footer>
+</body>
+</html>
