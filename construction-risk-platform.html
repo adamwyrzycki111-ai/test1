@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RiskFree AI - Construction Risk Review Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    
+    .page { display: none; }
+    .page.active { display: block; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    @keyframes progress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    
+    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
+    .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+    
+    .card-hover {
+      transition: all 0.2s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .drag-active {
+      border-color: #3b82f6 !important;
+      background-color: #eff6ff !important;
+    }
+    
+    .progress-bar {
+      animation: progress 3s ease-in-out forwards;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .toast {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    
+    .sidebar-item:hover {
+      background-color: #f8fafc;
+    }
+    
+    .sidebar-item.active {
+      background-color: #eff6ff;
+      color: #2563eb;
+      border-right: 3px solid #2563eb;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+  
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+  <!-- ==================== LANDING PAGE ==================== -->
+  <div id="landing-page" class="page active">
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <span class="text-xl font-bold gradient-text">RiskFree AI</span>
+          </div>
+          
+          <div class="hidden md:flex items-center gap-8">
+            <a href="#features" class="text-sm text-gray-600 hover:text-gray-900 transition">Features</a>
+            <a href="#pricing" class="text-sm text-gray-600 hover:text-gray-900 transition">Pricing</a>
+            <a href="#" class="text-sm text-gray-600 hover:text-gray-900 transition">Documentation</a>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <button onclick="showPage('auth-page')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition">Login</button>
+            <button onclick="showPage('auth-page')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">Get Started</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative bg-white overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 -z-10"></div>
+      <div class="absolute top-40 right-20 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-40 -z-10"></div>
+      <div class="absolute bottom-20 left-20 w-72 h-72 bg-indigo-100 rounded-full blur-3xl opacity-40 -z-10"></div>
+      
+      <div class="max-w-7xl mx-auto px-6 py-24 lg:py-32">
+        <div class="max-w-3xl mx-auto text-center">
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full mb-8 animate-fade-in">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <span class="text-sm font-medium text-blue-700">Now in Public Beta</span>
+          </div>
+          
+          <h1 class="text-5xl lg:text-6xl font-extrabold leading-tight mb-6 animate-fade-in">
+            AI-Powered<br>
+            <span class="gradient-text">Construction Risk Review</span>
+          </h1>
+          
+          <p class="text-xl text-gray-600 mb-10 animate-fade-in">
+            Upload your plans, contracts, and reports. Get instant structured risk insights powered by advanced AI analysis.
+          </p>
+          
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
+            <button onclick="showPage('auth-page')" class="w-full sm:w-auto bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200">
+              Get Started Free
+            </button>
+            <button onclick="showPage('auth-page')" class="w-full sm:w-auto bg-white border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-xl text-lg font-semibold hover:border-gray-300 transition">
+              Login
+            </button>
+          </div>
+          
+          <div class="mt-12 flex items-center justify-center gap-8 text-sm text-gray-500 animate-fade-in">
+            <span class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              No credit card required
+            </span>
+            <span class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              5-minute setup
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Preview Section -->
+    <section class="bg-gray-900 py-16">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="bg-gray-800 rounded-2xl p-4 shadow-2xl">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+          </div>
+          <div class="bg-white rounded-xl p-8">
+            <div class="flex items-start gap-4 mb-6">
+              <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900">Risk Analysis Complete</h3>
+                <p class="text-sm text-gray-500">4 critical risks identified in your construction documents</p>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
+                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                <span class="text-sm font-medium text-red-700">High Risk: Soil stability concerns in Phase 2</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                <span class="text-sm font-medium text-orange-700">Medium Risk: Contractor liability gaps detected</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                <span class="text-sm font-medium text-yellow-700">Low Risk: Insurance coverage expiration in 90 days</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span class="text-sm font-medium text-green-700">Passed: Building code compliance check</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24 bg-white">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+          <span class="text-blue-600 font-semibold text-sm uppercase tracking-wider">Features</span>
+          <h2 class="text-4xl font-bold mt-3 mb-4">Everything you need for risk management</h2>
+          <p class="text-xl text-gray-600 max-w-2xl mx-auto">Comprehensive tools designed specifically for construction professionals</p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <!-- Feature 1 -->
+          <div class="bg-gray-50 rounded-2xl p-8 card-hover">
+            <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">Secure File Upload</h3>
+            <p class="text-gray-600">Upload plans, contracts, and reports with enterprise-grade encryption and security.</p>
+          </div>
+          
+          <!-- Feature 2 -->
+          <div class="bg-gray-50 rounded-2xl p-8 card-hover">
+            <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">AI Risk Analysis</h3>
+            <p class="text-gray-600">Advanced AI analyzes your documents and identifies potential risks in seconds.</p>
+          </div>
+          
+          <!-- Feature 3 -->
+          <div class="bg-gray-50 rounded-2xl p-8 card-hover">
+            <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">Fast Turnaround</h3>
+            <p class="text-gray-600">Get comprehensive risk reports within minutes, not days. Speed up your decision-making.</p>
+          </div>
+          
+          <!-- Feature 4 -->
+          <div class="bg-gray-50 rounded-2xl p-8 card-hover">
+            <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">Enterprise Security</h3>
+            <p class="text-gray-600">Bank-level encryption, SOC 2 compliance, and secure cloud infrastructure.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Section -->
+    <section class="py-16 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-6">
+        <p class="text-center text-sm text-gray-500 mb-8">Trusted by leading construction companies</p>
+        <div class="flex flex-wrap items-center justify-center gap-12 opacity-60">
+          <div class="text-2xl font-bold text-gray-400">ACME Corp</div>
+          <div class="text-2xl font-bold text-gray-400">BuildWell Inc</div>
+          <div class="text-2xl font-bold text-gray-400">ConstructPro</div>
+          <div class="text-2xl font-bold text-gray-400">UrbanDev</div>
+          <div class="text-2xl font-bold text-gray-400">SafeBuild</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-24 bg-white">
+      <div class="max-w-4xl mx-auto px-6">
+        <div class="text-center mb-16">
+          <span class="text-blue-600 font-semibold text-sm uppercase tracking-wider">Pricing</span>
+          <h2 class="text-4xl font-bold mt-3 mb-4">Simple, transparent pricing</h2>
+          <p class="text-xl text-gray-600">Pay only for what you need</p>
+        </div>
+        
+        <div class="bg-white border-2 border-blue-600 rounded-2xl p-8 lg:p-12 relative">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+            Most Popular
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-8">
+            <div>
+              <h3 class="text-2xl font-bold mb-2">Single Risk Review</h3>
+              <p class="text-gray-600 mb-6">Perfect for one-time project reviews</p>
+              
+              <div class="flex items-baseline gap-2 mb-6">
+                <span class="text-5xl font-extrabold">£99</span>
+                <span class="text-gray-500">/ review</span>
+              </div>
+              
+              <ul class="space-y-4">
+                <li class="flex items-center gap-3">
+                  <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-gray-700">Up to 50 pages analyzed</span>
+                </li>
+                <li class="flex items-center gap-3">
+                  <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-gray-700">Detailed risk report</span>
+                </li>
+                <li class="flex items-center gap-3">
+                  <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-gray-700">Risk categorization</span>
+                </li>
+                <li class="flex items-center gap-3">
+                  <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-gray-700">Email support</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="flex items-center">
+              <button onclick="showPage('payment-page')" class="w-full bg-blue-600 text-white py-4 rounded-xl text-lg font-semibold hover:bg-blue-700 transition shadow-lg">
+                Pay Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-16">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="grid md:grid-cols-4 gap-12">
+          <div>
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <span class="text-xl font-bold text-white">RiskFree AI</span>
+            </div>
+            <p class="text-sm">AI-powered construction risk analysis for modern builders.</p>
+          </div>
+          
+          <div>
+            <h4 class="text-white font-semibold mb-4">Product</h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="#features" class="hover:text-white transition">Features</a></li>
+              <li><a href="#pricing" class="hover:text-white transition">Pricing</a></li>
+              <li><a href="#" class="hover:text-white transition">Documentation</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="text-white font-semibold mb-4">Company</h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="#" class="hover:text-white transition">About</a></li>
+              <li><a href="#" class="hover:text-white transition">Blog</a></li>
+              <li><a href="#" class="hover:text-white transition">Careers</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="text-white font-semibold mb-4">Legal</h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+              <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+              <li><a href="#" class="hover:text-white transition">Cookie Policy</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-800 mt-12 pt-8 text-sm text-center">
+          © 2024 RiskFree AI. All rights reserved.
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== AUTH PAGE ==================== -->
+  <div id="auth-page" class="page">
+    <div class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="flex items-center justify-center gap-2 mb-8">
+          <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <span class="text-2xl font-bold gradient-text">RiskFree AI</span>
+        </div>
+        
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+          <!-- Toggle -->
+          <div class="flex rounded-lg bg-gray-100 p-1 mb-8">
+            <button id="login-tab" onclick="toggleAuth('login')" class="flex-1 py-2 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm transition">Login</button>
+            <button id="signup-tab" onclick="toggleAuth('signup')" class="flex-1 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-700 transition">Sign Up</button>
+          </div>
+          
+          <!-- Login Form -->
+          <form id="login-form" class="space-y-6" onsubmit="handleLogin(event)">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <input type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="you@company.com">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="••••••••">
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2">
+                <input type="checkbox" class="rounded border-gray-300 text-blue-600">
+                <span class="text-sm text-gray-600">Remember me</span>
+              </label>
+              <a href="#" class="text-sm text-blue-600 hover:text-blue-700">Forgot password?</a>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">Continue</button>
+          </form>
+          
+          <!-- Signup Form -->
+          <form id="signup-form" class="space-y-6 hidden" onsubmit="handleSignup(event)">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <input type="text" required class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="John Smith">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <input type="email" required class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="you@company.com">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <input type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="••••••••">
+            </div>
+            <div>
+              <label class="flex items-start gap-2">
+                <input type="checkbox" required class="mt-1 rounded border-gray-300 text-blue-600">
+                <span class="text-sm text-gray-600">I agree to the <a href="#" class="text-blue-600">Terms of Service</a> and <a href="#" class="text-blue-600">Privacy Policy</a></span>
+              </label>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">Create Account</button>
+          </form>
+          
+          <div class="mt-6">
+            <div class="relative">
+              <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-200"></div>
+              </div>
+              <div class="relative flex justify-center text-sm">
+                <span class="px-4 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+            
+            <div class="mt-6 grid grid-cols-2 gap-4">
+              <button class="flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span class="text-sm font-medium">Google</span>
+              </button>
+              <button class="flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                <span class="text-sm font-medium">GitHub</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <p class="text-center text-sm text-gray-500 mt-6">
+          <a href="#" onclick="showPage('landing-page'); return false;" class="hover:text-gray-700">← Back to home</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== USER DASHBOARD ==================== -->
+  <div id="dashboard-page" class="page">
+    <div class="min-h-screen bg-gray-50 flex">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+        <div class="p-6 border-b border-gray-100">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <span class="text-lg font-bold gradient-text">RiskFree AI</span>
+          </div>
+        </div>
+        
+        <nav class="flex-1 p-4">
+          <ul class="space-y-1">
+            <li>
+              <a href="#" class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Dashboard
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showPage('upload-page'); return false;" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Upload Files
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showPage('payment-page'); return false;" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Payments
+              </a>
+            </li>
+            <li>
+              <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Reports
+              </a>
+            </li>
+            <li>
+              <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Settings
+              </a>
+            </li>
+          </ul>
+        </nav>
+        
+        <div class="p-4 border-t border-gray-100">
+          <div class="flex items-center gap-3 px-4 py-3">
+            <div class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center">
+              <span class="text-sm font-medium text-gray-600">JS</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900">John Smith</p>
+              <p class="text-xs text-gray-500">john@company.com</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Main Content -->
+      <main class="flex-1 overflow-auto">
+        <header class="bg-white border-b border-gray-200 px-8 py-6">
+          <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+        </header>
+        
+        <div class="p-8">
+          <!-- Welcome Card -->
+          <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white mb-8 animate-fade-in">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <h2 class="text-2xl font-bold mb-2">Welcome back, John!</h2>
+                <p class="text-blue-100">You have 3 risk reviews in progress. Start a new review to get AI-powered insights.</p>
+              </div>
+              <button onclick="showPage('upload-page')" class="bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition whitespace-nowrap">
+                Start New Risk Review
+              </button>
+            </div>
+          </div>
+          
+          <!-- Stats -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 border border-gray-200 animate-fade-in">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-medium text-gray-500">Total Reviews</span>
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-gray-900">12</p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 border border-gray-200 animate-fade-in">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-medium text-gray-500">Completed</span>
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-gray-900">9</p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 border border-gray-200 animate-fade-in">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-medium text-gray-500">In Progress</span>
+                <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-gray-900">3</p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 border border-gray-200 animate-fade-in">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-medium text-gray-500">Total Saved</span>
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-gray-900">£2,400</p>
+            </div>
+          </div>
+          
+          <!-- Recent Uploads -->
+          <div class="bg-white rounded-xl border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900">Recent Uploads</h3>
+            </div>
+            <div class="divide-y divide-gray-100" id="recent-uploads">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================== UPLOAD PAGE ==================== -->
+  <div id="upload-page" class="page">
+    <div class="min-h-screen bg-gray-50 flex">
+      <!-- Sidebar (same as dashboard) -->
+      <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+        <div class="p-6 border-b border-gray-100">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <span class="text-lg font-bold gradient-text">RiskFree AI</span>
+          </div>
+        </div>
+        
+        <nav class="flex-1 p-4">
+          <ul class="space-y-1">
+            <li>
+              <a href="#" onclick="showPage('dashboard-page'); return false;" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Dashboard
+              </a>
+            </li>
+            <li>
+              <a href="#" class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Upload Files
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showPage('payment-page'); return false;" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Payments
+              </a>
+            </li>
+            <li>
+              <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Reports
+              </a>
+            </li>
+            <li>
+              <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Settings
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+      
+      <!-- Main Content -->
+      <main class="flex-1 overflow-auto">
+        <header class="bg-white border-b border-gray-200 px-8 py-6">
+          <h1 class="text-2xl font-bold text-gray-900">Upload Files</h1>
+        </header>
+        
+        <div class="p-8 max-w-3xl">
+          <!-- Upload Form -->
+          <form id="upload-form" class="space-y-8" onsubmit="handleUpload(event)">
+            <!-- Project Details -->
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-6">Project Details</h3>
+              <div class="grid gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
+                  <input type="text" id="project-name" required class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="Downtown Office Complex">
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                    <input type="text" id="project-location" required class="w-full px-4 py-3 border border-gray-300 rounded-xl" placeholder="London, UK">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Project Type</label>
+                    <select id="project-type" required class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white">
+                      <option value="">Select type...</option>
+                      <option value="commercial">Commercial Building</option>
+                      <option value="residential">Residential Development</option>
+                      <option value="infrastructure">Infrastructure</option>
+                      <option value="renovation">Renovation Project</option>
+                      <option value="industrial">Industrial Facility</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- File Upload Area -->
+            <div class="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center transition-all" id="drop-zone">
+              <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="hidden" onchange="handleFileSelect(event)">
+              
+              <div id="upload-placeholder">
+                <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Drop files here or click to upload</h3>
+                <p class="text-sm text-gray-500 mb-4">Supports PDF, Images, Word documents</p>
+                <button type="button" onclick="document.getElementById('file-input').click()" class="text-blue-600 font-medium hover:text-blue-700">
+                  Browse files
+                </button>
+              </div>
+              
+              <div id="file-list" class="hidden space-y-3"></div>
+            </div>
+            
+            <!-- Upload Progress -->
+            <div id="upload-progress" class="hidden">
+              <div class="bg-white rounded-xl border border-gray-200 p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-sm font-medium text-gray-700">Uploading files...</span>
+                  <span id="progress-percent" class="text-sm font-medium text-blue-600">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Success State -->
+            <div id="upload-success" class="hidden">
+              <div class="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Files Submitted Successfully!</h3>
+                <p class="text-gray-600 mb-6">Our team will review your documents and provide a comprehensive risk analysis within 24-48 hours.</p>
+                <div class="flex justify-center gap-4">
+                  <button type="button" onclick="showPage('dashboard-page')" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+                    Go to Dashboard
+                  </button>
+                  <button type="button" onclick="resetUpload()" class="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-50 transition">
+                    Upload Another
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white py-4 rounded-xl text-lg font-semibold hover:bg-blue-700 transition shadow-lg">
+              Submit for Review
+            </button>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================== PAYMENT PAGE ==================== -->
+  <div id="payment-page" class="page">
+    <div class="min-h-screen bg-gray-50 flex">
+      <!-- Sidebar (same as dashboard) -->
+      <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+        <div class="p-6 border-b border-gray-100">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <span class="text-lg font-bold gradient-text">RiskFree AI</span>
+          </div>
+        </div>
+        
+        <nav class="flex-1 p-4">
+          <ul class="space-y-1">
+            <li>
+              <a href="#" onclick="showPage('dashboard-page'); return false;" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Dashboard
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showPage('upload-page'); return false;" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Upload Files
+              </a>
+            </li>
+            <li>
+              <a href="#" class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Payments
+              </a>
+            </li>
+            <li>
+              <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Reports
+              </a>
+            </li>
+            <li>
+              <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Settings
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+      
+      <!-- Main Content -->
+      <main class="flex-1 overflow-auto">
+        <header class="bg-white border-b border-gray-200 px-8 py-6">
+          <h1 class="text-2xl font-bold text-gray-900">Payments</h1>
+        </header>
+        
+        <div class="p-8 max-w-2xl">
+          <div class="bg-white rounded-xl border border-gray-200 p-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-2">Single Risk Review</h2>
+            <p class="text-gray-500 mb-6">Get comprehensive AI-powered risk analysis for your construction project</p>
+            
+            <!-- Price Toggle -->
+            <div class="flex items-center justify-center gap-4 mb-8">
+              <span id="monthly-label" class="text-sm font-medium text-gray-500">Standard</span>
+              <button onclick="togglePricing()" class="relative w-14 h-8 bg-gray-200 rounded-full transition-colors" id="price-toggle">
+                <div id="toggle-dot" class="absolute top-1 left-1 w-6 h-6 bg-blue-600 rounded-full transition-transform"></div>
+              </button>
+              <span id="annual-label" class="text-sm font-medium text-gray-900">Premium (£149)</span>
+            </div>
+            
+            <!-- Price Display -->
+            <div class="text-center mb-8">
+              <div class="flex items-baseline justify-center gap-2">
+                <span id="currency" class="text-4xl font-extrabold text-gray-900">£99</span>
+              </div>
+              <p class="text-sm text-gray-500 mt-2">One-time payment</p>
+            </div>
+            
+            <!-- Features -->
+            <ul class="space-y-4 mb-8">
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="text-gray-700">Up to 50 pages analyzed</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="text-gray-700">Detailed risk report with recommendations</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="text-gray-700">Risk categorization (High/Medium/Low)</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="text-gray-700">Priority email support</span>
+              </li>
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="text-gray-700">Report delivery within 24-48 hours</span>
+              </li>
+            </ul>
+            
+            <!-- Payment Form -->
+            <form onsubmit="handlePayment(event)" class="space-y-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Card number</label>
+                <div class="relative">
+                  <input type="text" required placeholder="1234 5678 9012 3456" class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl" maxlength="19">
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Expiry date</label>
+                  <input type="text" required placeholder="MM / YY" class="w-full px-4 py-3 border border-gray-300 rounded-xl" maxlength="7">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">CVC</label>
+                  <input type="text" required placeholder="123" class="w-full px-4 py-3 border border-gray-300 rounded-xl" maxlength="4">
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Cardholder name</label>
+                <input type="text" required placeholder="John Smith" class="w-full px-4 py-3 border border-gray-300 rounded-xl">
+              </div>
+              
+              <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl text-lg font-semibold hover:bg-blue-700 transition shadow-lg">
+                Pay £99
+              </button>
+            </form>
+            
+            <!-- Trust Badges -->
+            <div class="flex items-center justify-center gap-6 mt-8 pt-6 border-t border-gray-100">
+              <div class="flex items-center gap-2 text-sm text-gray-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Secure checkout
+              </div>
+              <div class="flex items-center gap-2 text-sm text-gray-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                SSL encrypted
+              </div>
+              <div class="flex items-center gap-2 text-sm text-gray-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Powered by Stripe
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN DASHBOARD ==================== -->
+  <div id="admin-page" class="page">
+    <div class="min-h-screen bg-gray-50">
+      <!-- Admin Header -->
+      <header class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <span class="text-lg font-bold">RiskFree AI Admin</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <button onclick="showPage('landing-page')" class="text-sm text-gray-400 hover:text-white transition">View Site</button>
+              <div class="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span class="text-sm font-medium">AD</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Admin Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <p class="text-sm font-medium text-gray-500 mb-2">Total Projects</p>
+            <p class="text-3xl font-bold text-gray-900">48</p>
+          </div>
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <p class="text-sm font-medium text-gray-500 mb-2">Pending Review</p>
+            <p class="text-3xl font-bold text-yellow-600">12</p>
+          </div>
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <p class="text-sm font-medium text-gray-500 mb-2">In Review</p>
+            <p class="text-3xl font-bold text-blue-600">8</p>
+          </div>
+          <div class="bg-white rounded-xl p-6 border border-gray-200">
+            <p class="text-sm font-medium text-gray-500 mb-2">Completed</p>
+            <p class="text-3xl font-bold text-green-600">28</p>
+          </div>
+        </div>
+        
+        <!-- Projects Table -->
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900">All Projects</h2>
+            <div class="flex items-center gap-4">
+              <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                <option>All Status</option>
+                <option>Pending</option>
+                <option>In Review</option>
+                <option>Completed</option>
+              </select>
+              <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition">
+                Export CSV
+              </button>
+            </div>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Project Name</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Upload Date</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100" id="admin-table-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Pagination -->
+          <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <p class="text-sm text-gray-500">Showing 1-10 of 48 projects</p>
+            <div class="flex items-center gap-2">
+              <button class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition" disabled>Previous</button>
+              <button class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm">1</button>
+              <button class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">2</button>
+              <button class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">3</button>
+              <button class="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+    // Mock Data
+    const mockUploads = [
+      { id: 1, name: 'Downtown Office Complex', date: 'Jan 15, 2024', status: 'completed', risk: '2 medium risks' },
+      { id: 2, name: 'Harbor View Residences', date: 'Jan 14, 2024', status: 'processing', risk: 'Analyzing...' },
+      { id: 3, name: 'Industrial Park Phase 2', date: 'Jan 13, 2024', status: 'completed', risk: 'No significant risks' },
+      { id: 4, name: 'Shopping Mall Renovation', date: 'Jan 12, 2024', status: 'processing', risk: 'Analyzing...' },
+    ];
+
+    const adminProjects = [
+      { user: 'John Smith', email: 'john@company.com', project: 'Downtown Office Complex', location: 'London', date: 'Jan 15, 2024', status: 'completed' },
+      { user: 'Sarah Wilson', email: 'sarah@buildwell.com', project: 'Harbor View Residences', location: 'Manchester', date: 'Jan 14, 2024', status: 'in_review' },
+      { user: 'Mike Johnson', email: 'mike@acmecorp.com', project: 'Industrial Park Phase 2', location: 'Birmingham', date: 'Jan 13, 2024', status: 'completed' },
+      { user: 'Emma Davis', email: 'emma@urban.dev', project: 'Shopping Mall Renovation', location: 'Leeds', date: 'Jan 12, 2024', status: 'pending' },
+      { user: 'David Brown', email: 'david@constructpro.com', project: 'Hotel Development', location: 'Bristol', date: 'Jan 11, 2024', status: 'pending' },
+      { user: 'Lisa Anderson', email: 'lisa@safebuild.com', project: 'School Extension', location: 'Edinburgh', date: 'Jan 10, 2024', status: 'in_review' },
+    ];
+
+    let selectedFiles = [];
+    let isPremium = false;
+
+    // Page Navigation
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      window.scrollTo(0, 0);
+
+      if (pageId === 'dashboard-page') {
+        renderRecentUploads();
+      }
+      if (pageId === 'admin-page') {
+        renderAdminTable();
+      }
+    }
+
+    // Auth Toggle
+    function toggleAuth(mode) {
+      const loginForm = document.getElementById('login-form');
+      const signupForm = document.getElementById('signup-form');
+      const loginTab = document.getElementById('login-tab');
+      const signupTab = document.getElementById('signup-tab');
+
+      if (mode === 'login') {
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+        loginTab.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+        loginTab.classList.remove('text-gray-500');
+        signupTab.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+        signupTab.classList.add('text-gray-500');
+      } else {
+        loginForm.classList.add('hidden');
+        signupForm.classList.remove('hidden');
+        signupTab.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+        signupTab.classList.remove('text-gray-500');
+        loginTab.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+        loginTab.classList.add('text-gray-500');
+      }
+    }
+
+    // Auth Handlers
+    function handleLogin(e) {
+      e.preventDefault();
+      showToast('Welcome back!', 'success');
+      showPage('dashboard-page');
+    }
+
+    function handleSignup(e) {
+      e.preventDefault();
+      showToast('Account created successfully!', 'success');
+      showPage('dashboard-page');
+    }
+
+    // Dashboard
+    function renderRecentUploads() {
+      const container = document.getElementById('recent-uploads');
+      container.innerHTML = mockUploads.map(upload => `
+        <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <p class="font-medium text-gray-900">${upload.name}</p>
+              <p class="text-sm text-gray-500">Uploaded ${upload.date}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+              upload.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+            }">
+              ${upload.status === 'completed' ? 'Completed' : 'Processing'}
+            </span>
+            <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">View Report →</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Admin Table
+    function renderAdminTable() {
+      const tbody = document.getElementById('admin-table-body');
+      tbody.innerHTML = adminProjects.map(project => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4">
+            <div>
+              <p class="font-medium text-gray-900">${project.user}</p>
+              <p class="text-sm text-gray-500">${project.email}</p>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <p class="font-medium text-gray-900">${project.project}</p>
+            <p class="text-sm text-gray-500">${project.location}</p>
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-500">${project.date}</td>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+              project.status === 'completed' ? 'bg-green-100 text-green-700' :
+              project.status === 'in_review' ? 'bg-blue-100 text-blue-700' :
+              'bg-yellow-100 text-yellow-700'
+            }">
+              ${project.status === 'completed' ? 'Completed' :
+                project.status === 'in_review' ? 'In Review' : 'Pending'}
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">View Details</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // File Upload
+    const dropZone = document.getElementById('drop-zone');
+    
+    if (dropZone) {
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-active');
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-active');
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-active');
+        handleFiles(e.dataTransfer.files);
+      });
+    }
+
+    function handleFileSelect(e) {
+      handleFiles(e.target.files);
+    }
+
+    function handleFiles(files) {
+      selectedFiles = Array.from(files);
+      const fileList = document.getElementById('file-list');
+      const placeholder = document.getElementById('upload-placeholder');
+
+      placeholder.classList.add('hidden');
+      fileList.classList.remove('hidden');
+      fileList.classList.add('block');
+
+      fileList.innerHTML = selectedFiles.map((file, index) => `
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <div>
+              <p class="text-sm font-medium text-gray-900">${file.name}</p>
+              <p class="text-xs text-gray-500">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+            </div>
+          </div>
+          <button type="button" onclick="removeFile(${index})" class="text-gray-400 hover:text-red-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function removeFile(index) {
+      selectedFiles.splice(index, 1);
+      if (selectedFiles.length === 0) {
+        document.getElementById('upload-placeholder').classList.remove('hidden');
+        document.getElementById('file-list').classList.add('hidden');
+      } else {
+        handleFiles({ length: selectedFiles.length, ...selectedFiles });
+      }
+    }
+
+    function handleUpload(e) {
+      e.preventDefault();
+      
+      if (selectedFiles.length === 0) {
+        showToast('Please select at least one file', 'error');
+        return;
+      }
+
+      // Show progress
+      document.getElementById('submit-btn').disabled = true;
+      document.getElementById('upload-progress').classList.remove('hidden');
+      
+      const progressBar = document.getElementById('progress-bar');
+      const progressPercent = document.getElementById('progress-percent');
+      let progress = 0;
+
+      const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          
+          // Show success
+          setTimeout(() => {
+            document.getElementById('upload-progress').classList.add('hidden');
+            document.getElementById('upload-success').classList.remove('hidden');
+            document.getElementById('submit-btn').disabled = false;
+            showToast('Files submitted successfully!', 'success');
+          }, 500);
+        }
+        
+        progressBar.style.width = progress + '%';
+        progressPercent.textContent = Math.round(progress) + '%';
+      }, 300);
+    }
+
+    function resetUpload() {
+      selectedFiles = [];
+      document.getElementById('upload-form').reset();
+      document.getElementById('upload-success').classList.add('hidden');
+      document.getElementById('upload-placeholder').classList.remove('hidden');
+      document.getElementById('file-list').classList.add('hidden');
+    }
+
+    // Payment
+    function togglePricing() {
+      isPremium = !isPremium;
+      const toggle = document.getElementById('price-toggle');
+      const dot = document.getElementById('toggle-dot');
+      const price = document.getElementById('currency');
+      const payBtn = document.querySelector('button[type="submit"]');
+
+      if (isPremium) {
+        dot.style.transform = 'translateX(24px)';
+        price.textContent = '£149';
+        payBtn.textContent = 'Pay £149';
+      } else {
+        dot.style.transform = 'translateX(0)';
+        price.textContent = '£99';
+        payBtn.textContent = 'Pay £99';
+      }
+    }
+
+    function handlePayment(e) {
+      e.preventDefault();
+      showToast('Payment successful! Thank you for your purchase.', 'success');
+      setTimeout(() => showPage('dashboard-page'), 1500);
+    }
+
+    // Toast Notification
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+      
+      toast.className = `toast ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3`;
+      toast.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          ${type === 'success' 
+            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />'
+            : type === 'error'
+            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />'
+            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'
+          }
+        </svg>
+        <span class="font-medium">${message}</span>
+      `;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check URL hash for admin page
+      if (window.location.hash === '#admin') {
+        showPage('admin-page');
+      }
+    });
+  </script>
+</body>
+</html>
